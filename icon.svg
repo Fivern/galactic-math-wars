@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#1c2550"/>
+      <stop offset="1" stop-color="#05060d"/>
+    </radialGradient>
+    <radialGradient id="planet" cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#d5d8dc"/>
+      <stop offset="1" stop-color="#4a4e56"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g fill="#fff">
+    <circle cx="60" cy="80" r="2.5" opacity=".8"/><circle cx="430" cy="60" r="2" opacity=".7"/><circle cx="470" cy="190" r="2.5" opacity=".6"/>
+    <circle cx="40" cy="300" r="2" opacity=".6"/><circle cx="110" cy="440" r="2.5" opacity=".7"/><circle cx="460" cy="420" r="2" opacity=".8"/>
+    <circle cx="200" cy="40" r="1.8" opacity=".6"/><circle cx="330" cy="470" r="2" opacity=".6"/><circle cx="90" cy="190" r="1.6" opacity=".5"/>
+  </g>
+  <circle cx="380" cy="150" r="70" fill="url(#planet)"/>
+  <path d="M310 154 H450" stroke="#3e424a" stroke-width="5"/>
+  <circle cx="356" cy="122" r="20" fill="#8a8f97" stroke="#4a4e56" stroke-width="4"/>
+  <circle cx="356" cy="122" r="6" fill="#3a3e46"/>
+  <!-- blue saber -->
+  <g stroke-linecap="round">
+    <line x1="120" y1="400" x2="370" y2="150" stroke="#4aa8ff" stroke-width="44" opacity=".18"/>
+    <line x1="120" y1="400" x2="370" y2="150" stroke="#4aa8ff" stroke-width="28" opacity=".35"/>
+    <line x1="120" y1="400" x2="370" y2="150" stroke="#4aa8ff" stroke-width="16"/>
+    <line x1="120" y1="400" x2="370" y2="150" stroke="#eaf6ff" stroke-width="7"/>
+    <line x1="78" y1="442" x2="122" y2="398" stroke="#c4c8ce" stroke-width="18"/>
+    <line x1="90" y1="430" x2="100" y2="420" stroke="#222" stroke-width="20"/>
+  </g>
+  <!-- red saber -->
+  <g stroke-linecap="round">
+    <line x1="392" y1="400" x2="142" y2="150" stroke="#ff2a2a" stroke-width="44" opacity=".18"/>
+    <line x1="392" y1="400" x2="142" y2="150" stroke="#ff2a2a" stroke-width="28" opacity=".35"/>
+    <line x1="392" y1="400" x2="142" y2="150" stroke="#ff2a2a" stroke-width="16"/>
+    <line x1="392" y1="400" x2="142" y2="150" stroke="#ffe6e6" stroke-width="7"/>
+    <line x1="434" y1="442" x2="390" y2="398" stroke="#2a2a30" stroke-width="18"/>
+    <line x1="422" y1="430" x2="412" y2="420" stroke="#888" stroke-width="20"/>
+  </g>
+  <!-- math signs -->
+  <circle cx="256" cy="275" r="64" fill="#05060d" stroke="#ffd84a" stroke-width="8"/>
+  <path d="M256 240 V310 M221 275 H291" stroke="#ffd84a" stroke-width="18" stroke-linecap="round"/>
+</svg>

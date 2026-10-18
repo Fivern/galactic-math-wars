@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Galactic Math Wars</title>
+<meta name="theme-color" content="#05060d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Math Wars">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060d; --panel:rgba(14,18,36,.88); --line:rgba(140,170,255,.25);
+  --text:#e8ecff; --dim:#8f99c4; --gold:#ffd84a; --good:#4ade80; --bad:#ff5266; --blue:#5cc8ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Nunito,system-ui,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
+#stars{position:fixed;inset:0;z-index:0}
+.screen{position:fixed;inset:0;z-index:1;display:none;flex-direction:column}
+.screen.on{display:flex}
+h1,h2,h3,.orb{font-family:Orbitron,sans-serif;letter-spacing:.04em}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+.btn{background:linear-gradient(#ffe26b,#e0a800);color:#1b1300;font-family:Orbitron,sans-serif;font-weight:900;font-size:18px;padding:14px 28px;border-radius:14px;box-shadow:0 4px 0 #8a6500,0 0 24px rgba(255,216,74,.35);letter-spacing:.06em;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6500}
+.btn.ghost{background:rgba(255,255,255,.08);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.small{font-size:13px;padding:9px 14px;border-radius:10px}
+
+/* ---------- title ---------- */
+#title{align-items:center;justify-content:center;text-align:center;gap:18px;padding:16px}
+#title h1{font-size:clamp(38px,8vw,92px);margin:0;color:var(--gold);font-weight:900;line-height:1;text-shadow:0 0 30px rgba(255,216,74,.45);-webkit-text-stroke:1px #a57d00}
+#title h1 span{display:block;font-size:.45em;color:#fff;-webkit-text-stroke:0;letter-spacing:.3em;margin-top:10px;text-shadow:0 0 14px var(--blue)}
+#title p{color:var(--dim);font-size:18px;max-width:520px}
+.gear{position:absolute;top:14px;right:16px}
+#setBtn0,#setBtn1,#setBtn2{font-family:system-ui,sans-serif;font-size:22px;line-height:1;padding:7px 11px}
+.seg{margin-top:4px}.seg .btn{min-width:150px}
+.box .lab{margin:18px 0 0;color:var(--dim);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.qvis{font-size:clamp(24px,5vw,38px);line-height:1.25;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px}
+.qvis:empty{display:none}
+.qvis .op{font-family:Orbitron;font-weight:900;color:var(--dim);margin:0 12px}
+.qvis .st{display:inline-block;position:relative}
+.qvis .gone{opacity:.35}
+.qvis .gone::after{content:"";position:absolute;left:-2px;right:-2px;top:46%;height:4px;border-radius:2px;background:var(--bad);transform:rotate(-35deg)}
+
+/* ---------- crawl ---------- */
+#crawl{overflow:hidden;cursor:pointer}
+#crawl .far{position:absolute;top:40%;width:100%;text-align:center;color:var(--blue);font-size:clamp(18px,3vw,30px);animation:fadeFar 4.5s forwards}
+@keyframes fadeFar{0%{opacity:0}15%,75%{opacity:1}100%{opacity:0}}
+#crawl .stage{position:absolute;inset:0;perspective:340px;perspective-origin:50% 0%;display:flex;justify-content:center}
+#crawl .text{position:absolute;top:100%;width:min(640px,90vw);color:var(--gold);font-family:Orbitron,sans-serif;font-weight:700;font-size:clamp(20px,3.6vw,34px);text-align:justify;line-height:1.45;transform-origin:50% 100%;transform:rotateX(24deg);animation:crawl 34s linear 4s forwards;opacity:0}
+#crawl .text h2{text-align:center;font-size:1.3em;margin:0 0 .6em}
+#crawl .text h3{text-align:center;margin:0}
+@keyframes crawl{0%{top:100%;opacity:1}100%{top:-260%;opacity:1}}
+#crawl .skip{position:absolute;right:16px;bottom:16px;z-index:3}
+
+/* ---------- select ---------- */
+#select{overflow-y:auto;padding:24px 16px 40px;align-items:center}
+#select h2{margin:8px 0 4px;color:var(--gold);text-align:center}
+#select .sub{color:var(--dim);margin:0 0 16px;text-align:center}
+.heroes{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;width:min(980px,100%)}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:8px 8px 12px;text-align:center;cursor:pointer;transition:transform .12s,border-color .12s}
+.card:hover{transform:translateY(-3px)}
+.card.sel{border-color:var(--gold);box-shadow:0 0 24px rgba(255,216,74,.35)}
+.card svg{width:100%;height:150px}
+.card .nm{font-weight:900;font-size:15px}
+.diffs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:min(980px,100%)}
+.diff{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;text-align:left}
+.diff.sel{border-color:var(--gold);box-shadow:0 0 18px rgba(255,216,74,.3)}
+.diff b{font-family:Orbitron;font-size:16px;color:var(--gold)}
+.diff small{display:block;color:var(--dim);margin-top:2px}
+.diff div{margin-top:6px;font-size:14px}
+#select .go{margin-top:22px}
+
+/* ---------- map ---------- */
+#map .bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(rgba(5,6,13,.95),rgba(5,6,13,0));flex-wrap:wrap}
+#map .bar .who{display:flex;align-items:center;gap:8px;font-weight:900}
+#map .bar .who svg{width:44px;height:52px}
+#map .bar .stat{color:var(--dim);font-size:14px}
+#map .bar .stat b{color:var(--text)}
+#map .bar .sp{flex:1}
+#map .wrap{flex:1;position:relative;min-height:0}
+#mapsvg{position:absolute;inset:0;width:100%;height:100%}
+.planet{cursor:pointer}
+.planet .ring{fill:none;stroke:var(--gold);stroke-width:3;stroke-dasharray:6 6;opacity:0}
+.planet.next .ring{opacity:1;animation:spin 8s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.planet.locked{opacity:.38}
+.planet text{font-family:Orbitron;font-weight:700;fill:#fff;font-size:15px;text-anchor:middle;paint-order:stroke;stroke:#000;stroke-width:4px}
+.planet text.foe{font-family:Nunito;font-size:13px;fill:#ffb3b3;font-weight:800}
+.planet text.done{fill:var(--good)}
+#map .hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);padding:10px 18px;border-radius:12px;font-weight:800;text-align:center;max-width:90%;pointer-events:none}
+
+/* ---------- battle ---------- */
+#battle .top{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(5,6,13,.85);z-index:2}
+#battle .top .pl{flex:1;text-align:center;font-family:Orbitron;font-weight:700;color:var(--gold);font-size:16px}
+.arena{flex:1;position:relative;min-height:0;display:flex;align-items:flex-end;justify-content:space-between;padding:0 4vw;overflow:hidden}
+.arena .scene{position:absolute;inset:0;z-index:0}
+.arena .scene svg{width:100%;height:100%;display:block}
+.rain{animation:rain .5s linear infinite}@keyframes rain{to{transform:translate(-16px,52px)}}
+.snow{animation:snow 9s linear infinite}@keyframes snow{to{transform:translate(-30px,500px)}}
+.flash{animation:flash 4s steps(1) infinite}@keyframes flash{0%,8%,14%,60%,64%{opacity:1}4%,10%,18%,62%,100%{opacity:0}}
+.fighter{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:min(34vw,300px);height:100%;justify-content:flex-end;padding-bottom:2%}
+.fighter .fig{width:100%;flex:0 1 auto;height:min(100%,330px);display:flex;justify-content:center;align-items:flex-end;min-height:0}
+.fighter .fig svg{height:100%;max-width:100%;animation:bob 2.6s ease-in-out infinite;will-change:transform}
+.foe .fig svg{animation-delay:-1.3s}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.fighter .tag{background:rgba(0,0,0,.6);padding:4px 12px;border-radius:10px;font-weight:900;font-size:15px;margin-top:4px;white-space:nowrap}
+.hp{display:flex;gap:6px;margin-bottom:6px;background:rgba(0,0,0,.45);padding:6px 9px;border-radius:20px}
+.pip{width:22px;height:22px;border-radius:50%;transition:all .3s}
+.hero .pip{background:radial-gradient(circle at 35% 35%,#fff,#5cc8ff 45%,#1460c8);box-shadow:0 0 10px #5cc8ff}
+.foe .pip{background:radial-gradient(circle at 35% 35%,#fff,#ff5266 45%,#a00018);box-shadow:0 0 10px #ff5266}
+.pip.lost{background:#222!important;box-shadow:none!important;transform:scale(.7);opacity:.5}
+.pip.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.7);filter:brightness(3)}100%{transform:scale(.7)}}
+.hero.lunge .fig{animation:lungeR .55s ease}
+.foe.lunge .fig{animation:lungeL .55s ease}
+@keyframes lungeR{45%{transform:translateX(14vw) rotate(4deg)}}
+@keyframes lungeL{45%{transform:translateX(-14vw) rotate(-4deg)}}
+.hero{--kb:-24px}.foe{--kb:24px}
+.hit .fig{animation:hit .55s .18s}
+@keyframes hit{0%,100%{transform:none;filter:none}15%{transform:translateX(var(--kb));filter:brightness(2.2) drop-shadow(0 0 16px #ff3344)}35%{transform:translateX(calc(var(--kb) * -.6))}55%{transform:translateX(calc(var(--kb) * .35))}}
+.fx{position:absolute;inset:0;pointer-events:none;z-index:3}
+.bolt{position:absolute;top:45%;width:70px;height:7px;border-radius:4px}
+.bolt.r{animation:boltR .32s linear forwards}
+.bolt.l{animation:boltL .32s linear forwards}
+@keyframes boltR{from{left:28%}to{left:72%}}
+@keyframes boltL{from{left:68%}to{left:24%}}
+.spark{position:absolute;top:38%;width:130px;height:130px;margin:-65px;border-radius:50%;background:radial-gradient(circle,#fff 0,#fff6 20%,transparent 60%);animation:spark .45s forwards}
+@keyframes spark{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.8);opacity:0}}
+.zap{position:absolute;inset:0;width:100%;height:100%;animation:zap .5s steps(5) forwards}
+@keyframes zap{0%,40%,80%{opacity:1}20%,60%{opacity:.2}100%{opacity:0}}
+.float{position:absolute;top:22%;font-family:Orbitron;font-weight:900;font-size:34px;animation:floatUp 1s forwards;text-shadow:0 0 12px currentColor}
+@keyframes floatUp{to{transform:translateY(-70px);opacity:0}}
+
+.panel{background:var(--panel);border-top:1px solid var(--line);padding:12px 16px 16px;display:flex;gap:16px;align-items:stretch;justify-content:center;flex-wrap:wrap;z-index:2}
+.qbox{flex:1 1 300px;max-width:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+.qtext{font-family:Orbitron;font-weight:900;font-size:clamp(28px,5.5vw,52px);line-height:1.1}
+.qlabel{color:var(--dim);font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.choices{flex:1 1 100%;max-width:820px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.choice{position:relative;height:76px;border-radius:14px;background:linear-gradient(#2a3460,#1a2142);font-family:Orbitron;font-weight:900;font-size:clamp(16px,4.4vw,34px);box-shadow:0 4px 0 #0b0f22,inset 0 0 0 2px var(--line);transition:transform .08s,opacity .3s}
+.choice:hover{box-shadow:0 4px 0 #0b0f22,inset 0 0 0 2px var(--blue)}
+.choice:active{transform:translateY(3px);box-shadow:0 1px 0 #0b0f22}
+.choice small{position:absolute;top:5px;left:9px;font-family:Nunito;font-size:11px;color:var(--dim)}
+.choice.good{background:linear-gradient(#5be38c,#1f9c4f);color:#03240f;box-shadow:0 0 22px #4ade80}
+.choice.bad{background:linear-gradient(#ff7a88,#c0283c);animation:shake .4s}
+.choice.dim{opacity:.35}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.fb{min-height:24px;font-weight:800;font-size:16px;max-width:520px}
+.fb .tip{display:block;color:var(--gold);font-weight:700;margin-top:4px}
+.fb .right{color:var(--good)}.fb .wrong{color:var(--bad)}
+.cont{display:none}
+.waiting .choices{pointer-events:none}.waiting .cont{display:block}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.box{background:linear-gradient(#141a36,#0b0f22);border:2px solid var(--line);border-radius:22px;padding:22px;max-width:620px;width:100%;text-align:center;box-shadow:0 0 60px rgba(92,200,255,.18);animation:boxIn .35s}
+@keyframes boxIn{from{transform:scale(.85);opacity:0}}
+.box h2{margin:0 0 6px;color:var(--gold);font-size:clamp(22px,4vw,32px)}
+.box p{color:#cfd6ff;font-size:17px;margin:8px 0}
+.box .vs{display:flex;align-items:center;justify-content:center;gap:4px;margin:6px 0}
+.box .vs svg{width:min(34vw,170px);height:min(42vw,210px)}
+.box .vs .x{font-family:Orbitron;font-weight:900;font-size:40px;color:var(--bad);text-shadow:0 0 18px var(--bad)}
+.box .taunt{font-style:italic;color:#ffb3b3}
+.box .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+#confetti{position:fixed;inset:0;z-index:30;pointer-events:none}
+
+@media (max-height:640px){
+  .choice{height:56px}
+  .qtext{font-size:30px}
+  .panel{padding:8px 12px 10px}
+}
+@media (max-width:520px){
+  .arena{padding:0 2vw}
+  .fighter{width:46vw}
+  .fighter .tag{font-size:12px}
+  .choices{gap:6px}.choice{height:62px}
+  .pip{width:16px;height:16px}
+  .hp{gap:4px;padding:5px 7px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="svgdefs"><defs>
+  <linearGradient id="vol" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".38" stop-color="#fff" stop-opacity="0"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".42"/></linearGradient>
+  <radialGradient id="sph" cx=".32" cy=".3" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset=".7" stop-color="#000" stop-opacity=".25"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+</defs></svg>
+<canvas id="stars"></canvas>
+
+<section id="title" class="screen">
+  <h1>GALACTIC<br>MATH WARS<span data-i18n="title.sub"></span></h1>
+  <p data-i18n="title.p"></p>
+  <button class="btn" id="startBtn" data-i18n="title.start"></button>
+  <button class="btn ghost small" id="continueBtn" style="display:none" data-i18n="title.continue"></button>
+  <button class="btn ghost small gear" id="setBtn0" aria-label="Settings">⚙</button>
+</section>
+
+<section id="crawl" class="screen">
+  <div class="far orb" data-i18n="crawl.far"></div>
+  <div class="stage"><div class="text">
+    <h3>Episode M</h3>
+    <h2 data-i18n="crawl.h"></h2>
+    <p data-i18n="crawl.p1"></p>
+    <p data-i18n="crawl.p2"></p>
+    <p data-i18n="crawl.p3"></p>
+  </div></div>
+  <button class="btn ghost small skip" id="skipBtn" data-i18n="crawl.skip"></button>
+</section>
+
+<section id="select" class="screen">
+  <h2 data-i18n="sel.hero"></h2>
+  <p class="sub" data-i18n="sel.heroSub"></p>
+  <div class="heroes" id="heroes"></div>
+  <h2 style="margin-top:26px" data-i18n="sel.level"></h2>
+  <p class="sub" data-i18n="sel.levelSub"></p>
+  <div class="diffs" id="diffs"></div>
+  <button class="btn go" id="goBtn" data-i18n="sel.go"></button>
+</section>
+
+<section id="map" class="screen">
+  <div class="bar">
+    <div class="who" id="who"></div>
+    <div class="stat" id="mapStats"></div>
+    <div class="sp"></div>
+    <button class="btn ghost small" id="changeBtn" data-i18n="map.change"></button>
+    <button class="btn ghost small" id="setBtn1" aria-label="Settings">⚙</button>
+  </div>
+  <div class="wrap">
+    <svg id="mapsvg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="hint" id="mapHint"></div>
+  </div>
+</section>
+
+<section id="battle" class="screen">
+  <div class="top">
+    <button class="btn ghost small" id="fleeBtn" data-i18n="bat.map"></button>
+    <div class="pl" id="bPlanet"></div>
+    <button class="btn ghost small" id="setBtn2" aria-label="Settings">⚙</button>
+  </div>
+  <div class="arena" id="arena">
+    <div class="scene" id="scene"></div>
+    <div class="fighter hero" id="fHero"><div class="hp" id="hpHero"></div><div class="fig" id="figHero"></div><div class="tag" id="tagHero"></div></div>
+    <div class="fighter foe" id="fFoe"><div class="hp" id="hpFoe"></div><div class="fig" id="figFoe"></div><div class="tag" id="tagFoe"></div></div>
+    <div class="fx" id="fx"></div>
+  </div>
+  <div class="panel" id="panel">
+    <div class="qbox">
+      <div class="qlabel" id="qlabel"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="qvis" id="qvis"></div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <div class="choices" id="choices"></div>
+    <div class="cont"><button class="btn" id="contBtn" data-i18n="bat.gotit"></button></div>
+  </div>
+</section>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* =====================================================================
+   Data
+   ===================================================================== */
+const HEROES = [
+  {id:'luke',  name:'Luke Skywalker', look:{art:'luke',   weapon:'saber',   color:'#4aa8ff'}},
+  {id:'leia',  name:'Princess Leia', nameNo:'Prinsesse Leia',  look:{art:'leia',   weapon:'blaster', color:'#ff4545'}},
+  {id:'obiwan',name:'Obi-Wan Kenobi', look:{art:'obiwan', weapon:'saber',   color:'#4aa8ff'}},
+  {id:'yoda',  name:'Yoda',           look:{art:'yoda',   weapon:'saber',   color:'#3ee06a'}},
+  {id:'han',   name:'Han Solo',       look:{art:'han',    weapon:'blaster', color:'#ff4545'}},
+  {id:'chewie',name:'Chewbacca',      look:{art:'chewie', weapon:'blaster', color:'#ff4545'}},
+  {id:'rey',   name:'Rey',            look:{art:'rey',    weapon:'saber',   color:'#ffd23a'}},
+  {id:'mace',  name:'Mace Windu',     look:{art:'mace',   weapon:'saber',   color:'#b55cff'}},
+];
+
+const START = {name:'Yavin 4', sub:'Rebel base', subNo:'Opprørsbasen', x:70, y:300};
+const PLANETS = [
+  {id:'tatooine', name:'Tatooine', x:170, y:500, r:30, c:['#ffe2a0','#c98a3d'],
+   foe:{name:'Boba Fett', taunt:'"You\'re worth a lot of credits... if you get the sums wrong."', tauntNo:'«Du er verdt mange kreditter ... hvis du regner feil.»',
+        look:{art:'boba', weapon:'blaster', color:'#ff5a3d'}}},
+  {id:'kamino', name:'Kamino', x:300, y:330, r:28, c:['#c8e6ff','#3a6f9a'],
+   foe:{name:'Jango Fett', taunt:'"My clones count faster than you."', tauntNo:'«Klonene mine regner raskere enn deg.»',
+        look:{art:'jango', weapon:'blaster', color:'#ff5a3d'}}},
+  {id:'naboo', name:'Naboo', x:440, y:500, r:30, c:['#c4f2b0','#2f8a52'],
+   foe:{name:'Darth Maul', taunt:'"At last we will see how sharp your numbers are."', tauntNo:'«Endelig skal vi se hvor skarpe tallene dine er.»',
+        look:{art:'maul', weapon:'double', color:'#ff2a2a'}}},
+  {id:'geonosis', name:'Geonosis', x:540, y:290, r:28, c:['#ffb37a','#a8461e'],
+   foe:{name:'Count Dooku', taunt:'"Your arithmetic is weak, young one."', tauntNo:'«Regningen din er svak, unge venn.»',
+        look:{art:'dooku', weapon:'saber', color:'#ff2a2a'}}},
+  {id:'utapau', name:'Utapau', x:680, y:470, r:28, c:['#e6dcc0','#8a7a58'],
+   foe:{name:'General Grievous', taunt:'"Your calculator will make a fine addition to my collection!"', tauntNo:'«Kalkulatoren din blir et fint tilskudd til samlingen min!»',
+        look:{art:'grievous', weapon:'two', color:'#4aa8ff'}}},
+  {id:'starkiller', name:'Starkiller Base', nameNo:'Starkiller-basen', x:770, y:240, r:30, c:['#f4fbff','#7f9db6'],
+   foe:{name:'Kylo Ren', taunt:'"Let the old numbers die. Or answer them, if you must."', tauntNo:'«La de gamle tallene dø. Eller svar på dem, hvis du må.»',
+        look:{art:'kylo', weapon:'cross', color:'#ff2a2a'}}},
+  {id:'exegol', name:'Exegol', x:900, y:430, r:28, c:['#8a6aa8','#1e1030'],
+   foe:{name:'Emperor Palpatine', nameNo:'Keiser Palpatine', taunt:'"Now feel the power of the times tables!"', tauntNo:'«Kjenn nå kraften i gangetabellen!»',
+        look:{art:'palpatine', weapon:'lightning', color:'#9fd8ff'}}},
+  {id:'deathstar', name:'The Death Star', nameNo:'Dødsstjernen', x:900, y:140, r:44, c:['#d5d8dc','#5d6168'], deathstar:true,
+   foe:{name:'Darth Vader', hp:7, taunt:'"You do not know the power of the dark side... or maybe you know the power of math?"', tauntNo:'«Du kjenner ikke kraften i den mørke siden ... eller kanskje du kjenner kraften i matte?»',
+        look:{art:'vader', weapon:'saber', color:'#ff2a2a'}}},
+];
+
+const DIFFS = {
+  ewok:     {name:'Ewok', age:'Ages 4–5', ageNo:'Alder 4–5', desc:'Plus and minus up to 5, then up to 10, with stars to count', descNo:'Pluss og minus opp til 5, så opp til 10, med stjerner å telle'},
+  youngling:{name:'Youngling', age:'Ages 5–7', ageNo:'Alder 5–7', desc:'Plus and minus up to 10, then up to 20', descNo:'Pluss og minus opp til 10, så opp til 20'},
+  padawan:  {name:'Padawan', age:'Ages 7–9', ageNo:'Alder 7–9', desc:'Plus and minus up to 100, plus the 2, 5 and 10 times tables', descNo:'Pluss og minus opp til 100, og 2-, 5- og 10-gangen'},
+  knight:   {name:'Jedi Knight', nameNo:'Jedi-ridder', age:'Ages 9–11', ageNo:'Alder 9–11', desc:'All the times tables, division and bigger numbers', descNo:'Hele gangetabellen, deling og større tall'},
+  master:   {name:'Jedi Master', nameNo:'Jedi-mester', age:'Ages 11+', ageNo:'Alder 11+', desc:'Multi-digit multiplication, order of operations, percent and squares', descNo:'Ganging med flersifrede tall, regnerekkefølge, prosent og kvadrattall'},
+};
+const DIFF_ORDER = ['ewok','youngling','padawan','knight','master'];
+
+/* =====================================================================
+   Text in both languages. Values are strings or functions of arguments.
+   ===================================================================== */
+const TXT = {
+ en:{
+  'title.sub':'A MATHEMATICS ADVENTURE',
+  'title.p':'Choose your hero, travel the galaxy and defeat the dark side with the power of mathematics. Face Darth Vader on the Death Star if you make it that far!',
+  'title.start':'START','title.continue':'CONTINUE',
+  'crawl.far':'A long time ago in a galaxy far,<br>far away....','crawl.h':'THE NUMBER STRIKES BACK',
+  'crawl.p1':'The galaxy is in danger. The dark side has taken over eight worlds, from the desert sands of Tatooine to the dreaded DEATH STAR.',
+  'crawl.p2':'Their troops are strong, but they have one weakness: they cannot stand up to a hero who knows the ancient art of MATHEMATICS.',
+  'crawl.p3':'From the secret Rebel base on Yavin 4, a young hero sets out to free the galaxy one problem at a time....',
+  'crawl.skip':'SKIP ▶',
+  'sel.hero':'CHOOSE YOUR HERO','sel.heroSub':'Who will fight for the light side?',
+  'sel.level':'CHOOSE YOUR LEVEL','sel.levelSub':'The problems get a little harder on every planet.','sel.go':'TO THE GALAXY MAP ▶',
+  'map.change':'Change hero/level',
+  'map.stats':(n,tot,r,t,pct,best)=>`Planets freed: <b>${n}/${tot}</b> · Correct: <b>${r}/${t}</b> (${pct}%) · Best streak: <b>${best}</b>`,
+  'map.allFree':'The galaxy is free! Tap a planet to battle again.',
+  'map.next':(pl,foe)=>`Tap <span style="color:var(--gold)">${pl}</span> to fly there and face ${foe}!`,
+  'map.locked':(pl,cur)=>`🔒 ${pl} is locked. Free ${cur} first!`,
+  'map.freed':'✓ Freed',
+  'intro.final':'THE FINAL BATTLE','intro.ds':'The Death Star. Darth Vader is waiting for you...',
+  'intro.rules':(foe,pl)=>`${foe} rules ${pl}.`,
+  'intro.how':foe=>`Every correct answer costs ${foe} a point. Every wrong answer costs you one. First to 0 loses!`,
+  'intro.strong':(foe,hp,max)=>`${foe} is extra strong: ${hp} points against your ${max}!`,
+  'intro.notYet':'Not yet','intro.fight':'⚔ FIGHT!',
+  'bat.map':'◀ Map','bat.gotit':'GOT IT ▶','bat.flee':'Leave the battle? The opponent gets their points back.',
+  'lbl.pick':'Pick the right answer','lbl.missing':'Find the missing number','lbl.order':'Watch the order of operations!','lbl.paren':'Parentheses first!','lbl.count':'Count the stars!',
+  'bat.streak':n=>`🔥 ${n} in a row!`,
+  'bat.praise':['Correct!','Excellent!','The Force is strong with you!','Spot on!','Great job!','Perfect!'],
+  'bat.oops':(q,missing,ans)=>`Oops! ${missing?'The missing number is':q+' ='} <b>${ans}</b>.`,
+  'win.title':'VICTORY!','win.text':(foe,pl)=>`You defeated <b>${foe}</b>! ${pl} is free.`,
+  'win.next':(pl,foe)=>`Next stop: ${pl}, where ${foe} is waiting...`,'win.toMap':'TO THE MAP ▶',
+  'lose.title':'DEFEAT...','lose.text':foe=>`<b>${foe}</b> won this round.`,
+  'lose.tip':'Every Jedi learns from defeat. Train a little more and try again!','lose.map':'To the map','lose.retry':'TRY AGAIN',
+  'fin.title':'THE GALAXY IS FREE!','fin.text':h=>`${h} defeated <b>Darth Vader</b> and destroyed the Death Star with the power of mathematics!`,
+  'fin.stats':(r,t,pct,best)=>`Correct: <b>${r}/${t}</b> (${pct}%) · Best streak: <b>${best}</b>`,
+  'fin.harder':n=>`NEW GAME AS ${n}`,'fin.again':'PLAY AGAIN',
+  'confirm.new':'Start a new game? Your current progress will be reset.',
+  'set.title':'SETTINGS','set.lang':'Language','set.sound':'Sound','set.on':'On','set.off':'Off','set.done':'DONE',
+  'q.percent':(p,n)=>`${p}% of ${n}`,
+  'h.addSplit':(ta,tb,oa,ob,s)=>`Split into tens and ones: ${ta} + ${tb} = ${ta+tb}, and ${oa} + ${ob} = ${oa+ob}. Together: ${ta+tb} + ${oa+ob} = ${s}.`,
+  'h.makeTen':(big,need,rest,s)=>`Make 10: ${big} + ${need} = 10, then ${rest} more makes ${s}.`,
+  'h.countUp':(big,small,seq)=>`Start at ${big} and count up ${small}: ${seq}.`,
+  'h.addGen':(a,b,s)=>`${a} + ${b} = ${s}. Tip: start with the bigger number and add the smaller one.`,
+  'h.sub0':a=>`Taking away 0 leaves the number unchanged: ${a}.`,
+  'h.countBack':(a,b,seq)=>`Start at ${a} and count back ${b}: ${seq}.`,
+  'h.subTens':(a,tb,ob,mid,d)=>`First subtract the tens: ${a} − ${tb} = ${mid}. Then the ones: ${mid} − ${ob} = ${d}.`,
+  'h.subUp':(a,b,d)=>`Think: ${b} + ? = ${a}. Count up from ${b} to ${a}, and you get ${d}.`,
+  'h.mul1':p=>`Anything times 1 is itself: ${p}.`,
+  'h.mul10':p=>`Times 10: just add a zero at the end! ${p}.`,
+  'h.mulSkip':(m,n,seq)=>`Count by ${m}s, ${n} times: ${seq}.`,
+  'h.mulSplit':(m,n,p)=>`Split it up: ${m} × 5 = ${m*5}, and ${m} × ${n-5} = ${m*(n-5)}. Together: ${m*5} + ${m*(n-5)} = ${p}.`,
+  'h.bigMul':(a,b,t,o)=>`Split ${a} into ${t} + ${o}: ${t} × ${b} = ${t*b}, and ${o} × ${b} = ${o*b}. Together: ${t*b} + ${o*b} = ${a*b}.`,
+  'h.missAdd':(a,c)=>`${a} + ? = ${c} is the same as ${c} − ${a}, which is ${c-a}.`,
+  'h.div':(a,b,q)=>`Think multiplication: ${b} × ? = ${a}. Since ${b} × ${q} = ${a}, the answer is ${q}.`,
+  'h.missMul':(a,b)=>`${a} × ? = ${a*b} is the same as ${a*b} ÷ ${a}, which is ${b}.`,
+  'h.orderAdd':(a,b,c)=>`Multiply first: ${b} × ${c} = ${b*c}. Then add: ${a} + ${b*c} = ${a+b*c}.`,
+  'h.orderSub':(big,b,c)=>`Multiply first: ${b} × ${c} = ${b*c}. Then subtract: ${big} − ${b*c} = ${big-b*c}.`,
+  'h.paren':(a,b,c)=>`Parentheses first: ${a} + ${b} = ${a+b}. Then ${a+b} × ${c} = ${(a+b)*c}.`,
+  'h.pctWord':{10:'a tenth (÷ 10)',25:'a quarter (÷ 4)',50:'half (÷ 2)',20:'a fifth (÷ 5)'},
+  'h.percent':(p,word,n)=>`${p}% is ${word}: ${n} ÷ ${100/p} = ${n*p/100}.`,
+  'h.square':n=>`${n}² means ${n} × ${n} = ${n*n}.`,
+  'h.ewokAdd':seq=>`Count all the stars: ${seq}.`,
+  'h.ewokSub':(a,b,d)=>`Start with ${a} stars and take away ${b}. That leaves ${d}.`,
+ },
+ no:{
+  'title.sub':'ET MATTE-EVENTYR',
+  'title.p':'Velg din helt, reis gjennom galaksen og beseir den mørke siden med matematikkens kraft. Møt Darth Vader på Dødsstjernen hvis du kommer så langt!',
+  'title.start':'START','title.continue':'FORTSETT',
+  'crawl.far':'For lenge, lenge siden i en galakse<br>langt, langt borte....','crawl.h':'TALLENE SLÅR TILBAKE',
+  'crawl.p1':'Galaksen er i fare. Den mørke siden har tatt over åtte verdener, fra ørkensanden på Tatooine til den fryktede DØDSSTJERNEN.',
+  'crawl.p2':'Troppene deres er sterke, men de har én svakhet: de klarer ikke å stå imot en helt som kan den eldgamle kunsten MATEMATIKK.',
+  'crawl.p3':'Fra den hemmelige opprørsbasen på Yavin 4 drar en ung helt ut for å befri galaksen, én oppgave om gangen....',
+  'crawl.skip':'HOPP OVER ▶',
+  'sel.hero':'VELG DIN HELT','sel.heroSub':'Hvem skal kjempe for den lyse siden?',
+  'sel.level':'VELG NIVÅ','sel.levelSub':'Oppgavene blir litt vanskeligere for hver planet.','sel.go':'TIL GALAKSEKARTET ▶',
+  'map.change':'Bytt helt/nivå',
+  'map.stats':(n,tot,r,t,pct,best)=>`Planeter befridd: <b>${n}/${tot}</b> · Riktige: <b>${r}/${t}</b> (${pct} %) · Beste rekke: <b>${best}</b>`,
+  'map.allFree':'Galaksen er fri! Trykk på en planet for å kjempe igjen.',
+  'map.next':(pl,foe)=>`Trykk på <span style="color:var(--gold)">${pl}</span> for å fly dit og møte ${foe}!`,
+  'map.locked':(pl,cur)=>`🔒 ${pl} er låst. Befri ${cur} først!`,
+  'map.freed':'✓ Befridd',
+  'intro.final':'DET SISTE SLAGET','intro.ds':'Dødsstjernen. Darth Vader venter på deg ...',
+  'intro.rules':(foe,pl)=>`${foe} hersker over ${pl}.`,
+  'intro.how':foe=>`Hvert riktige svar koster ${foe} ett poeng. Hvert feil svar koster deg ett. Den som først kommer til 0, taper!`,
+  'intro.strong':(foe,hp,max)=>`${foe} er ekstra sterk: ${hp} poeng mot dine ${max}!`,
+  'intro.notYet':'Ikke ennå','intro.fight':'⚔ KJEMP!',
+  'bat.map':'◀ Kart','bat.gotit':'SKJØNNER ▶','bat.flee':'Vil du forlate kampen? Motstanderen får poengene sine tilbake.',
+  'lbl.pick':'Velg riktig svar','lbl.missing':'Finn tallet som mangler','lbl.order':'Husk regnerekkefølgen!','lbl.paren':'Parentesen først!','lbl.count':'Tell stjernene!',
+  'bat.streak':n=>`🔥 ${n} på rad!`,
+  'bat.praise':['Riktig!','Strålende!','Kraften er sterk i deg!','Helt riktig!','Bra jobba!','Perfekt!'],
+  'bat.oops':(q,missing,ans)=>`Oi! ${missing?'Tallet som mangler er':q+' ='} <b>${ans}</b>.`,
+  'win.title':'SEIER!','win.text':(foe,pl)=>`Du beseiret <b>${foe}</b>! ${pl} er fri.`,
+  'win.next':(pl,foe)=>`Neste stopp: ${pl}, der ${foe} venter ...`,'win.toMap':'TIL KARTET ▶',
+  'lose.title':'TAP ...','lose.text':foe=>`<b>${foe}</b> vant denne runden.`,
+  'lose.tip':'Alle jedier lærer av å tape. Tren litt til og prøv igjen!','lose.map':'Til kartet','lose.retry':'PRØV IGJEN',
+  'fin.title':'GALAKSEN ER FRI!','fin.text':h=>`${h} beseiret <b>Darth Vader</b> og ødela Dødsstjernen med matematikkens kraft!`,
+  'fin.stats':(r,t,pct,best)=>`Riktige: <b>${r}/${t}</b> (${pct} %) · Beste rekke: <b>${best}</b>`,
+  'fin.harder':n=>`NYTT SPILL SOM ${n}`,'fin.again':'SPILL IGJEN',
+  'confirm.new':'Vil du starte et nytt spill? Fremgangen din blir nullstilt.',
+  'set.title':'INNSTILLINGER','set.lang':'Språk','set.sound':'Lyd','set.on':'På','set.off':'Av','set.done':'FERDIG',
+  'q.percent':(p,n)=>`${p} % av ${n}`,
+  'h.addSplit':(ta,tb,oa,ob,s)=>`Del opp i tiere og enere: ${ta} + ${tb} = ${ta+tb}, og ${oa} + ${ob} = ${oa+ob}. Til sammen: ${ta+tb} + ${oa+ob} = ${s}.`,
+  'h.makeTen':(big,need,rest,s)=>`Lag 10: ${big} + ${need} = 10, og ${rest} til blir ${s}.`,
+  'h.countUp':(big,small,seq)=>`Start på ${big} og tell ${small} opp: ${seq}.`,
+  'h.addGen':(a,b,s)=>`${a} + ${b} = ${s}. Tips: start med det største tallet og legg til det minste.`,
+  'h.sub0':a=>`Tar du bort 0, blir tallet det samme: ${a}.`,
+  'h.countBack':(a,b,seq)=>`Start på ${a} og tell ${b} ned: ${seq}.`,
+  'h.subTens':(a,tb,ob,mid,d)=>`Trekk fra tierne først: ${a} − ${tb} = ${mid}. Så enerne: ${mid} − ${ob} = ${d}.`,
+  'h.subUp':(a,b,d)=>`Tenk: ${b} + ? = ${a}. Tell opp fra ${b} til ${a}, så får du ${d}.`,
+  'h.mul1':p=>`Alt ganger 1 blir seg selv: ${p}.`,
+  'h.mul10':p=>`Ganger 10: bare sett en null bakerst! ${p}.`,
+  'h.mulSkip':(m,n,seq)=>`Tell ${m} om gangen, ${n} ganger: ${seq}.`,
+  'h.mulSplit':(m,n,p)=>`Del det opp: ${m} × 5 = ${m*5}, og ${m} × ${n-5} = ${m*(n-5)}. Til sammen: ${m*5} + ${m*(n-5)} = ${p}.`,
+  'h.bigMul':(a,b,t,o)=>`Del ${a} i ${t} + ${o}: ${t} × ${b} = ${t*b}, og ${o} × ${b} = ${o*b}. Til sammen: ${t*b} + ${o*b} = ${a*b}.`,
+  'h.missAdd':(a,c)=>`${a} + ? = ${c} er det samme som ${c} − ${a}, som er ${c-a}.`,
+  'h.div':(a,b,q)=>`Tenk ganging: ${b} × ? = ${a}. Siden ${b} × ${q} = ${a}, er svaret ${q}.`,
+  'h.missMul':(a,b)=>`${a} × ? = ${a*b} er det samme som ${a*b} ÷ ${a}, som er ${b}.`,
+  'h.orderAdd':(a,b,c)=>`Gang først: ${b} × ${c} = ${b*c}. Legg så til: ${a} + ${b*c} = ${a+b*c}.`,
+  'h.orderSub':(big,b,c)=>`Gang først: ${b} × ${c} = ${b*c}. Trekk så fra: ${big} − ${b*c} = ${big-b*c}.`,
+  'h.paren':(a,b,c)=>`Parentesen først: ${a} + ${b} = ${a+b}. Så ${a+b} × ${c} = ${(a+b)*c}.`,
+  'h.pctWord':{10:'en tidel (÷ 10)',25:'en firedel (÷ 4)',50:'halvparten (÷ 2)',20:'en femdel (÷ 5)'},
+  'h.percent':(p,word,n)=>`${p} % er ${word}: ${n} ÷ ${100/p} = ${n*p/100}.`,
+  'h.square':n=>`${n}² betyr ${n} × ${n} = ${n*n}.`,
+  'h.ewokAdd':seq=>`Tell alle stjernene: ${seq}.`,
+  'h.ewokSub':(a,b,d)=>`Start med ${a} stjerner og ta bort ${b}. Da er det ${d} igjen.`,
+ },
+};
+function t(k,...a){ const v=(TXT[S.lang]&&TXT[S.lang][k])??TXT.en[k]; return typeof v==='function'?v(...a):v; }
+// Names, taunts and level texts: the English value is the default, a "...No" field overrides it in Norwegian.
+function localizeData(){
+  const set=(o,f)=>{ if(o[f+'En']===undefined) o[f+'En']=o[f]; o[f]=(S.lang==='no'&&o[f+'No'])||o[f+'En']; };
+  HEROES.forEach(h=>set(h,'name'));
+  PLANETS.forEach(p=>{ set(p,'name'); set(p.foe,'name'); set(p.foe,'taunt'); });
+  set(START,'sub');
+  Object.values(DIFFS).forEach(d=>{ set(d,'name'); set(d,'age'); set(d,'desc'); });
+}
+
+/* =====================================================================
+   Save
+   ===================================================================== */
+const SAVE_KEY = 'galactic-math-wars-v1';
+function defaultLang(){ try{ return /^(nb|nn|no)\b/i.test(navigator.language||'')?'no':'en'; }catch(e){ return 'en'; } }
+function freshSave(){ return {hero:null, diff:'padawan', conquered:0, stats:{right:0,total:0,best:0}, sound:true, seenCrawl:false, lang:defaultLang()}; }
+let S = freshSave();
+try { const raw = localStorage.getItem(SAVE_KEY); if (raw) S = Object.assign(freshSave(), JSON.parse(raw)); } catch(e){}
+function save(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch(e){} }
+
+/* =====================================================================
+   Character art — layered, shaded SVG. Figures face right and stand on
+   y=290. Shading comes from the shared gradients in #svgdefs.
+   ===================================================================== */
+const P=(d,f,o='')=>`<path d="${d}" fill="${f}" ${o}/>`;
+const PV=(d,f,o='')=>`<path d="${d}" fill="${f}" ${o}/><path d="${d}" fill="url(#vol)"/>`;
+const ST=(d,c,w,o='')=>`<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round" ${o}/>`;
+function limb(d,w,c){ return ST(d,c,w)+`<path d="${d}" transform="translate(${(w*.22).toFixed(1)},0)" stroke="rgba(0,0,0,.22)" stroke-width="${(w*.42).toFixed(1)}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; }
+function hand(x,y,c,r=6.5){ return `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x+r*.25}" cy="${y+r*.25}" r="${r*.62}" fill="rgba(0,0,0,.14)"/>`; }
+function rng(seed){ return ()=>(seed=(seed*16807)%2147483647)/2147483647; }
+let ARTUID=0;
+
+const POSE={
+  saber:  {back:'M86 80 Q84 114 104 124 L146 120', front:'M122 80 Q142 102 152 109', hb:[147,121], hf:[153,109], hilt:[146,128,158,97]},
+  blaster:{back:'M86 80 Q76 110 80 140', front:'M122 80 Q140 96 158 96', hb:[80,142], hf:[159,97]},
+  dual:   {back:'M86 80 Q100 106 146 112', front:'M122 80 Q140 94 160 92', hb:[147,112], hf:[161,92]},
+  cast:   {back:'M86 82 Q108 104 152 108', front:'M122 80 Q142 92 164 90', hb:[153,108], hf:[165,90]},
+};
+const TORSO='M80 74 Q103 64 126 74 L130 118 L127 152 L82 152 L78 118Z';
+const LEG_B='M88 146 L108 148 L101 222 L95 278 L79 278 L82 220Z';
+const LEG_F='M104 148 L126 146 L132 218 L141 278 L122 278 L114 220Z';
+const FACE='M89 34 Q88 13 105 12 Q122 12 123 31 Q124 39 121 45 L122 49 Q119 58 109 61 Q98 62 93 55 Q88 47 89 34Z';
+
+function bootB(top){ const r=101-(top-222)*.1; return `M${82-(top-220)*.05} ${top} L${r} ${top} L96 280 L99 289 L69 289 Q69 281 78 278Z`; }
+function bootF(top){ return `M${114+(top-220)*.14} ${top} L${132+(top-218)*.15} ${top} L143 276 Q157 280 157 289 L120 289Z`; }
+function legs(pants,boots,top=248){
+  return PV(LEG_B,pants)+P(LEG_B,'rgba(0,0,0,.2)')+PV(LEG_F,pants)
+    +PV(bootB(top),boots)+P(bootB(top),'rgba(0,0,0,.18)')+PV(bootF(top),boots)
+    +ST(`M124 ${top+4} L140 ${top+4}`,'rgba(255,255,255,.12)',1.5);
+}
+function belt(c,buckle='#c9ccd2',pouches){
+  let s=PV('M79 136 L129 136 L130 148 L80 148Z',c)+`<rect x="100" y="135.5" width="11" height="13" rx="1.5" fill="${buckle}"/><rect x="102.5" y="138.5" width="6" height="7" fill="rgba(0,0,0,.25)"/>`;
+  if(pouches) s+=`<rect x="116" y="137" width="9" height="12" rx="1.5" fill="${pouches}"/><rect x="85" y="137" width="9" height="12" rx="1.5" fill="${pouches}"/>`;
+  return s;
+}
+function face(o){
+  const s=o.skin, e=o.eye||'#3b2a1a', b=o.brow||'#3a2412';
+  return P('M92 36 Q85 36 86 43 Q87 51 93 50Z',s)+ST('M90 40 Q88 43 90.5 47','rgba(0,0,0,.25)',1.2)
+    +PV(FACE,s)+P('M93 55 Q98 62 109 61 Q101 57 97 50Z','rgba(0,0,0,.12)')
+    +`<ellipse cx="104" cy="34.5" rx="3.6" ry="2.4" fill="#fff"/><circle cx="105.2" cy="34.6" r="1.8" fill="${e}"/><circle cx="105.2" cy="34.6" r=".8" fill="#000"/>`
+    +`<ellipse cx="116" cy="34.5" rx="2.6" ry="2.2" fill="#fff"/><circle cx="116.8" cy="34.6" r="1.5" fill="${e}"/><circle cx="116.8" cy="34.6" r=".7" fill="#000"/>`
+    +ST('M100 30 Q104 27.6 108.5 29.4',b,2.1)+ST('M113.5 29.4 Q116.5 28.2 119.8 30.4',b,1.9)
+    +ST('M111.5 36 Q113 42 117.5 44.5 Q116 46.5 112 46','rgba(0,0,0,.3)',1.3)
+    +ST(o.mouth||'M105 51.5 Q110.5 53 116 50.5','#8a4a3a',1.6)+(o.extra||'');
+}
+function neck(c){ return PV('M98 50 L111 50 L112 72 L97 72Z',c); }
+
+function saber(x1,y1,x2,y2,color,len=112,o={}){
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, nx=-uy, ny=ux;
+  const ex=x2+ux*len, ey=y2+uy*len, f=n=>n.toFixed(1);
+  const glow=`style="filter:drop-shadow(0 0 5px ${color}) drop-shadow(0 0 12px ${color})"`;
+  let h='';
+  if(o.curved) h+=ST(`M${f(x1+nx*7)} ${f(y1+ny*7)} Q${f(x1+dx*.3+nx*4)} ${f(y1+dy*.3+ny*4)} ${f(x1+dx*.5)} ${f(y1+dy*.5)} L${f(x2)} ${f(y2)}`,o.hilt||'#c4c8ce',7.5);
+  else h+=`<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${o.hilt||'#c4c8ce'}" stroke-width="7.5" stroke-linecap="round"/>`;
+  for(let t=.2;t<.62;t+=.09){ const px=x1+dx*t, py=y1+dy*t; h+=`<line x1="${f(px+nx*3.8)}" y1="${f(py+ny*3.8)}" x2="${f(px-nx*3.8)}" y2="${f(py-ny*3.8)}" stroke="#1a1a1a" stroke-width="2"/>`; }
+  h+=`<line x1="${f(x2-ux*7)}" y1="${f(y2-uy*7)}" x2="${f(x2)}" y2="${f(y2)}" stroke="#7d828a" stroke-width="9.5"/>`;
+  h+=`<circle cx="${f(x1+dx*.74)}" cy="${f(y1+dy*.74)}" r="1.7" fill="#e33"/>`;
+  if(o.cross){
+    for(const sg of [1,-1]) h+=`<line x1="${f(x2-ux*4+nx*5*sg)}" y1="${f(y2-uy*4+ny*5*sg)}" x2="${f(x2-ux*4+nx*17*sg)}" y2="${f(y2-uy*4+ny*17*sg)}" stroke="${color}" stroke-width="5" stroke-linecap="round" ${glow}/>`;
+  }
+  if(o.unstable){
+    const r=rng(7); let pts=`${f(x2)},${f(y2)}`;
+    for(let t=8;t<=len;t+=8){ const j=(r()-.5)*5; pts+=` ${f(x2+ux*t+nx*j)},${f(y2+uy*t+ny*j)}`; }
+    h+=`<polyline class="blade" points="${pts}" stroke="${color}" stroke-width="12" fill="none" stroke-linejoin="round" stroke-linecap="round" ${glow}/>`;
+    h+=`<polyline points="${pts}" stroke="#fff" stroke-width="4" fill="none" stroke-linejoin="round" opacity=".9"/>`;
+  } else {
+    h+=`<line class="blade" x1="${f(x2)}" y1="${f(y2)}" x2="${f(ex)}" y2="${f(ey)}" stroke="${color}" stroke-width="11" stroke-linecap="round" ${glow}/>`;
+    h+=`<line x1="${f(x2)}" y1="${f(y2)}" x2="${f(ex)}" y2="${f(ey)}" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/>`;
+  }
+  return h;
+}
+const saberPose=(color,o)=>{ const [a,b,c,d]=POSE.saber.hilt; return saber(a,b,c,d,color,112,o); };
+
+/* --- blasters, drawn with the grip under hand position (x,y) --- */
+function dl44(x,y){ return `<g transform="translate(${x-6},${y-8})">`+P('M0 4 L36 4 L36 11 L14 11 L12 15 L4 15 L0 11Z','#232428')
+  +P('M36 4.5 L46 2.5 L46 12.5 L36 10.5Z','#3c3e44')+P('M8 -1 L26 -1 L26 4 L8 4Z','#50535a')+`<rect x="26" y="0" width="3" height="4" fill="#2a2a2a"/>`
+  +P('M2 11 L10 11 L8 27 L-1 27Z','#4a3222')+ST('M14 7 L34 7','#5a5d64',1)+`</g>`; }
+function pistol(x,y,c='#2a2b30',tip='#a9adb5'){ return `<g transform="translate(${x-6},${y-8})">`+P('M0 4 L26 4 L26 10 L12 10 L10 14 L3 14 L0 10Z',c)
+  +`<rect x="26" y="5" width="6" height="4" fill="${tip}"/>`+P('M2 10 L9 10 L8 24 L0 24Z',c)+ST('M6 6 L22 6','rgba(255,255,255,.25)',1)+`</g>`; }
+function ee3(x,y){ return `<g transform="translate(${x-6},${y-8})">`+P('M-30 6 L0 3 L56 3 L56 9 L14 10 L12 15 L3 15 L0 11 L-30 15Z','#2a2a2a')
+  +P('M-30 6 L-24 5.4 L-24 14.4 L-30 15Z','#5a4a3a')+`<rect x="10" y="-3" width="22" height="5" rx="1" fill="#55585e"/><rect x="56" y="4" width="8" height="4" fill="#666"/>`
+  +P('M2 11 L10 11 L8 26 L0 26Z','#3a3a3a')+`</g>`; }
+function bowcaster(x,y){ return `<g transform="translate(${x-6},${y-8})">`+P('M-26 4 L44 3 L44 11 L14 11 L12 16 L3 16 L0 12 L-26 13Z','#6a4a2c')
+  +ST('M-24 7 L40 6','#8a6a44',1.2)+`<rect x="8" y="-4" width="26" height="6" rx="2" fill="#8a8e96"/>`+ST('M40 -12 Q48 7 40 26','#9aa0a8',3.5)
+  +ST('M40 -12 L44 7 L40 26','#ddd',0.8)+P('M2 12 L10 12 L8 26 L0 26Z','#4a3420')+`</g>`; }
+
+/* --- composition helper for human-shaped characters --- */
+function human(o){
+  const pose=POSE[o.pose]; let s='';
+  s+=o.behind||'';
+  s+=limb(pose.back,o.armW||15,o.sleeveB||o.sleeve)+hand(...pose.hb,o.gloveB||o.glove||o.skin);
+  s+=o.legs||'';
+  s+=neck(o.neck||o.skin);
+  s+=PV(o.torsoPath||TORSO,o.torso)+(o.torsoDetail||'');
+  s+=o.belt||'';
+  s+=o.collar||'';
+  s+=o.head;
+  s+=o.weapon||'';
+  s+=limb(pose.front,o.armW||15,o.sleeve)+(o.frontArmDetail||'')+hand(...pose.hf,o.glove||o.skin);
+  s+=o.front||'';
+  return s;
+}
+const JEDI_TABARD=(c)=>P('M101 68 L109 68 L115 150 L104 150Z',c)+P('M90 70 L96 68 L97 150 L86 150Z',c);
+
+const ART = {
+  luke(L){ const skin='#f1c6a0';
+    return human({pose:'saber', skin, sleeve:'#eeeae0', torso:'#eeeae0',
+      legs:legs('#e2dac6','#6e4e34',244),
+      torsoDetail:ST('M103 70 L119 138','#cbc4b4',2)+ST('M86 92 Q92 120 88 136','rgba(0,0,0,.08)',3),
+      belt:belt('#1f1f23','#c9ccd2','#2c2c30')+`<rect x="122" y="140" width="4" height="14" fill="#999"/>`,
+      collar:P('M97 66 L104 74 L112 66 L110 78 L104 76 L99 78Z','#dcd5c4'),
+      head:P('M88 42 Q82 14 102 8 Q122 6 127 26 Q124 18 114 17 Q100 18 93 28 Q90 34 91 46Z','#cfa54e')
+        +face({skin,eye:'#3f6d9e',brow:'#b88a3a'})
+        +P('M92 28 Q96 10 114 11 Q126 14 126 28 Q121 21 116 21 Q110 25 101 22 Q96 26 94 33Z','#d9b45a')
+        +ST('M100 14 Q108 15 114 20 M106 12 Q116 14 121 22','#b8913e',1.2),
+      weapon:saberPose(L.color)});
+  },
+  leia(L){ const skin='#f0c3a0', dress='#f3f2ee';
+    return human({pose:'blaster', skin, sleeve:dress, torso:dress,
+      torsoPath:'M80 74 Q103 64 126 74 L131 124 L148 289 L62 289 L76 124Z',
+      torsoDetail:ST('M98 150 L92 286 M112 150 L118 286 M124 160 L138 286 M88 160 L76 286','#d5d3cc',1.6),
+      behind:P('M84 64 Q103 54 124 64 L126 92 Q103 98 82 92Z','#e4e2dc'),
+      belt:PV('M80 132 L130 132 L131 141 L80 141Z','#bfc3c9')+ST('M84 136.5 L127 136.5','#8a8e96',1,'stroke-dasharray="3 2"'),
+      collar:P('M95 64 Q104 72 113 64 L114 72 Q104 80 94 72Z','#e8e6e0'),
+      head:`<circle cx="123" cy="39" r="9" fill="#35200f"/><circle cx="86" cy="40" r="13" fill="#3e2416"/><circle cx="86" cy="40" r="13" fill="url(#vol)"/>`+ST('M78 36 Q86 30 94 36 M77 42 Q86 36 95 43 M79 48 Q86 44 93 49','#2a170c',1.2)
+        +face({skin,eye:'#4a2c18',brow:'#3a2010'})
+        +P('M89 38 Q87 10 106 9 Q124 10 124 28 Q114 17 104 18 Q94 20 91 36Z','#45291a')+ST('M98 14 Q108 13 118 19','#5c3824',1.2),
+      weapon:pistol(159,97)});
+  },
+  obiwan(L){ const skin='#efc29e', cloak='#5e3f28';
+    return human({pose:'saber', skin, sleeve:cloak, torso:'#e8dcbf',
+      behind:PV('M78 70 Q58 170 54 289 L132 289 Q140 170 126 72Z',cloak),
+      legs:legs('#ddd0b2','#3a2618',226),
+      torsoDetail:JEDI_TABARD('#c6ae82')+ST('M104 70 L104 150','#d1c3a2',1.4),
+      belt:belt('#5a3a22','#8a6a44','#4a2e1a'),
+      collar:P('M96 64 L104 74 L113 64 L112 72 L104 80 L97 72Z','#d9cba9')+P('M82 72 Q90 66 98 66 L92 96 Z',cloak)+P('M124 72 Q118 66 112 66 L118 96Z',cloak),
+      head:P('M88 40 Q84 12 104 9 Q124 8 125 26 Q118 17 108 18 Q98 22 92 32 Q90 38 91 44Z','#9a5a2a')
+        +face({skin,eye:'#4b6f8a',brow:'#8a4a22'})
+        +P('M93 47 Q95 61 106 65 Q118 65 122 50 Q118 54 112 53 Q108 56 103 54 Q97 54 93 47Z','#9a5a2a')
+        +P('M106 49 Q111 46.5 117.5 49 Q112 51 106 50Z','#8a4a22')
+        +P('M92 30 Q98 12 115 12 Q125 15 124 26 Q116 19 104 21 Q98 24 94 34Z','#a8662f'),
+      weapon:saberPose(L.color)});
+  },
+  mace(L){ const skin='#6b4128', cloak='#3e2a1c';
+    return human({pose:'saber', skin, sleeve:cloak, torso:'#a27c56',
+      behind:PV('M78 70 Q58 170 54 289 L132 289 Q140 170 126 72Z',cloak),
+      legs:legs('#8e6c4a','#2a1c12',226),
+      torsoDetail:JEDI_TABARD('#7a5a3c'),
+      belt:belt('#3a2618','#7a6040','#2e1e12'),
+      collar:P('M96 64 L104 74 L113 64 L112 72 L104 80 L97 72Z','#8a6a48')+P('M82 72 Q90 66 98 66 L92 96 Z',cloak)+P('M124 72 Q118 66 112 66 L118 96Z',cloak),
+      head:face({skin,eye:'#2a1a10',brow:'#1e120a',mouth:'M106 51.5 Q111 50.6 116 51.2'})
+        +`<ellipse cx="104" cy="19" rx="10" ry="5" fill="rgba(255,255,255,.18)"/>`+ST('M100 29 L108 30.5','#1e120a',2.4),
+      weapon:saberPose(L.color)});
+  },
+  han(L){ const skin='#efc19c';
+    return human({pose:'blaster', skin, sleeve:'#f0ece2', torso:'#f0ece2',
+      legs:legs('#2b3448','#18181c',240)+ST('M127 150 L133 216 L139 250','#b3312a',3.2,'stroke-dasharray="5 3"'),
+      torsoDetail:P('M80 74 Q88 70 96 70 L99 152 L82 152 L78 118Z','#1c1c21')+P('M112 70 Q120 70 126 74 L130 118 L127 152 L114 152Z','#1c1c21')
+        +P('M80 74 Q88 70 96 70 L99 152 L82 152 L78 118Z','url(#vol)')+ST('M104 72 L106 132','#d8d3c6',1.4),
+      belt:PV('M80 140 L129 136 L132 147 L81 151Z','#5a3a22')+`<rect x="101" y="139" width="9" height="10" rx="1" fill="#b9bcc2"/>`+PV('M125 146 L137 146 L139 186 L128 188Z','#4a3020'),
+      collar:P('M96 62 L104 74 L112 62 L111 56 L97 56Z','#e6e1d4'),
+      head:P('M88 42 Q82 13 104 8 Q125 7 126 26 Q118 15 106 17 Q114 19 118 26 Q106 21 96 26 Q91 32 91 46Z','#4e3220')
+        +face({skin,eye:'#4a3a28',brow:'#3a2414',mouth:'M106 51.5 Q111 52.6 116 50'})
+        +P('M92 30 Q98 11 112 11 Q122 12 125 22 Q112 15 100 22 Q95 26 94 34Z','#5a3a26'),
+      weapon:dl44(159,97)});
+  },
+  rey(L){ const skin='#f0c29c';
+    return human({pose:'saber', skin, sleeve:'#cfc6b0', torso:'#e5d9c0',
+      legs:legs('#d6c8ac','#6a4c30',212)+ST('M118 218 L136 216 M116 230 L137 228','#4e3622',2),
+      torsoDetail:P('M84 76 L120 140 L110 142 L80 90Z','#d9caa8')+ST('M84 76 L120 140','#c4b28c',1.4)+ST('M90 100 L104 110 M95 116 L110 124','rgba(0,0,0,.08)',2),
+      belt:PV('M79 134 L129 134 L130 148 L80 148Z','#8a6c4a')+PV('M80 144 L130 140 L131 146 L81 150Z','#5a4028'),
+      frontArmDetail:ST('M128 86 L134 82 M132 92 L140 88 M137 98 L145 96 M142 103 L150 102','#a69e88',1.6),
+      head:`<circle cx="87" cy="22" r="6.5" fill="#4a2e18"/><circle cx="83" cy="32" r="6.5" fill="#4a2e18"/><circle cx="85" cy="42" r="6" fill="#4a2e18"/>`
+        +face({skin,eye:'#4a3a24',brow:'#4a2e18'})
+        +P('M89 36 Q88 11 106 10 Q123 10 124 26 Q114 17 104 19 Q94 22 91 34Z','#5b3a20')+ST('M96 16 Q106 13 118 18','#6e4a2c',1.2),
+      weapon:saberPose(L.color)});
+  },
+  chewie(L){
+    const fur='#7a4f2e', id='cw'+(++ARTUID), r=rng(11);
+    let strokes=''; for(let i=0;i<170;i++){ const x=70+r()*80, y=60+r()*230, c=r()<.5?'#5a3820':'#9a6a40'; strokes+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)} q${(r()*3-1.5).toFixed(1)} 4 ${(r()*2-1).toFixed(1)} 9" stroke="${c}" stroke-width="1.3" fill="none"/>`; }
+    const body='M78 70 Q103 58 128 70 L134 120 L130 150 L136 220 L144 286 L120 288 L112 222 L104 160 L98 222 L96 288 L72 288 L82 220 L80 150 L76 118Z';
+    let s=limb(POSE.blaster.back,17,'#6e4628')+hand(80,142,'#5a3820',7);
+    s+=`<clipPath id="${id}"><path d="${body}"/></clipPath>`+PV(body,fur)+`<g clip-path="url(#${id})">${strokes}</g>`;
+    s+=ST('M122 72 L84 150','#4a3220',10)+(()=>{ let b=''; for(let t=.1;t<.95;t+=.13){ const x=122-38*t, y=72+78*t; b+=`<rect x="${(x-4).toFixed(1)}" y="${(y-3).toFixed(1)}" width="8" height="6" rx="1" fill="#b4b8be" transform="rotate(-64 ${x.toFixed(1)} ${y.toFixed(1)})"/>`; } return b; })();
+    s+=PV('M86 40 Q84 6 106 4 Q129 6 129 34 Q131 52 122 64 Q110 72 98 68 Q86 60 86 40Z',fur)
+      +ST('M90 20 l-3 6 M96 10 l-2 7 M110 6 l1 6 M122 12 l2 6 M127 24 l3 5 M88 50 l-4 4 M90 60 l-3 5','#5a3820',1.6)
+      +P('M103 40 Q110 35 123 39 Q130 50 124 59 Q113 64 104 57Z','#a87a4a')
+      +`<ellipse cx="121.5" cy="44" rx="4.5" ry="3.3" fill="#1a1210"/>`+ST('M108 58 Q116 61 123 57','#2a1a10',1.6)
+      +`<ellipse cx="105" cy="31" rx="2.6" ry="2" fill="#1d2a38"/><ellipse cx="117" cy="31" rx="2.2" ry="1.8" fill="#1d2a38"/><circle cx="105.6" cy="30.5" r=".7" fill="#fff"/>`
+      +ST('M100 27 Q105 24 110 26 M113 26 Q117 24 121 27','#5a3820',2.4);
+    s+=bowcaster(159,97)+limb(POSE.blaster.front,17,fur)+hand(159,97,'#5a3820',7);
+    return `<g transform="translate(104 290) scale(1.12) translate(-104 -290)">${s}</g>`;
+  },
+  yoda(L){ const skin='#9cb86e';
+    let s='';
+    s+=PV('M74 210 Q102 194 134 210 L148 290 L58 290Z','#6a5038');
+    s+=PV('M84 210 Q104 202 124 210 L132 290 L76 290Z','#cdbb98')+ST('M104 214 L102 288 M92 230 L88 288','#b3a07c',1.4);
+    s+=P('M84 283 Q80 291 98 291 L100 285Z',skin)+P('M112 283 Q110 291 128 291 L128 285Z',skin);
+    s+=limb('M90 220 Q94 244 120 242',11,'#6a5038')+hand(122,242,skin,5);
+    s+=P('M86 172 L36 154 Q40 168 48 174 Q64 186 90 188Z',skin)+P('M80 174 L46 162 Q56 176 84 184Z','#c88a74','opacity=".45"');
+    s+=P('M124 170 L176 150 Q172 166 164 174 Q146 186 122 188Z',skin)+P('M128 174 L166 158 Q158 172 128 184Z','#c88a74','opacity=".45"');
+    s+=`<ellipse cx="106" cy="180" rx="25" ry="22" fill="${skin}"/><ellipse cx="106" cy="180" rx="25" ry="22" fill="url(#vol)"/>`;
+    s+=ST('M88 166 Q106 160 124 166 M90 171 Q106 166 122 171','#7a9a52',1.4)+ST('M92 194 Q106 200 120 194','#7a9a52',1.2);
+    s+=`<ellipse cx="99" cy="180" rx="6" ry="4.6" fill="#f1ecd0"/><circle cx="100" cy="180" r="3.4" fill="#4a3a14"/><circle cx="101" cy="179" r="1.1" fill="#fff"/>`;
+    s+=`<ellipse cx="116" cy="180" rx="5" ry="4.2" fill="#f1ecd0"/><circle cx="117" cy="180" r="3" fill="#4a3a14"/><circle cx="117.8" cy="179" r="1" fill="#fff"/>`;
+    s+=ST('M93 175 Q99 172 105 175 M111 175 Q116 172 121 175','#6a8a44',1.8)+ST('M109 182 Q112 188 109 190','#6a8a44',1.4)+ST('M101 195 Q108 197 115 194','#5a7a3a',1.6);
+    s+=ST('M96 160 Q90 150 84 152 M104 158 Q104 148 98 146 M112 159 Q118 150 124 152','#eeeeee',1,'opacity=".8"');
+    s+=P('M86 206 Q104 214 124 206 L120 214 Q104 220 88 214Z','#6a5038');
+    s+=saber(122,250,131,226,L.color,72);
+    s+=limb('M120 214 Q130 228 131 236',11,'#6a5038')+hand(131,236,skin,5);
+    return s;
+  },
+
+  /* ---------------- dark side ---------------- */
+  boba(L){ const suit='#8b8d84', green='#4f6b3a';
+    return human({pose:'blaster', skin:'#3a2e24', glove:'#3a2e24', sleeve:suit, torso:suit,
+      behind:PV('M68 68 L88 64 L90 142 L70 144Z','#a7aaa6')+P('M72 70 L79 36 L86 70Z','#8a2a22')+`<circle cx="79" cy="36" r="3" fill="#ccc"/>`
+        +PV('M80 72 Q66 110 72 166 L88 154 Q84 110 94 74Z','#5c5236'),
+      legs:legs(suit,'#5a4532',246)+PV('M117 206 L135 204 L137 224 L119 226Z',green)+ST('M125 210 l6 8','#2a3a1e',1),
+      torsoDetail:PV('M95 76 L114 76 L116 101 L99 105Z',green)+PV('M114 78 L127 76 L129 101 L118 102Z',green)
+        +ST('M100 82 l6 4 M104 94 l8 -2 M120 84 l4 6','#2c3b20',1.2)+`<rect x="98" y="108" width="20" height="12" rx="2" fill="#c4b066"/>`
+        +ST('M96 76 Q104 72 116 76','#c8b88a',3),
+      belt:belt('#5a4532','#8a8a7a','#4a3828'),
+      frontArmDetail:ST('M144 94 L154 96','#8a2a22',11),
+      head:ST('M93 26 L95 -2','#4a4a44',2.4)+`<rect x="91" y="-8" width="8" height="8" rx="1" fill="#55585e"/>`
+        +PV('M86 34 Q86 9 106 8 Q127 9 127 34 L127 54 Q121 63 106 63 Q91 63 86 54Z',green)
+        +ST('M90 22 Q106 6 124 20','#8a2a22',4)+ST('M99 13 q4 3 8 1','#2c3b20',1.4)
+        +`<circle cx="91" cy="42" r="6.5" fill="#9a9c96"/><circle cx="91" cy="42" r="3" fill="#6a6c66"/>`
+        +P('M98 27 L127 27 L127 34 L118 34 L118 55 L111 55 L111 34 L98 34Z','#111')+P('M100 56 L126 56 L124 62 L102 62Z','#c4b066','opacity=".8"'),
+      weapon:ee3(159,97)});
+  },
+  jango(L){ const suit='#3e4f72', silver='#c2c8ce';
+    return human({pose:'dual', skin:'#2a2a30', sleeve:suit, torso:suit,
+      behind:PV('M68 68 L88 64 L90 142 L70 144Z','#b9c0c6')+P('M73 70 L79 44 L85 70Z','#3a5a8a'),
+      legs:legs(suit,'#8a9aae',244)+PV('M117 206 L135 204 L137 224 L119 226Z',silver),
+      torsoDetail:PV('M95 76 L114 76 L116 101 L99 105Z',silver)+PV('M114 78 L127 76 L129 101 L118 102Z',silver)+ST('M96 76 Q104 72 116 76','#2a3550',3),
+      belt:belt('#3a3024','#9aa0a8','#2e261c'),
+      frontArmDetail:ST('M144 92 L154 92','#9aa0a8',11),
+      head:PV('M86 34 Q86 9 106 8 Q127 9 127 34 L127 54 Q121 63 106 63 Q91 63 86 54Z',silver)
+        +ST('M90 22 Q106 6 124 20','#3a5a8a',4)+`<circle cx="91" cy="42" r="6.5" fill="#8a929c"/><circle cx="91" cy="42" r="3" fill="#5a626c"/>`
+        +P('M98 27 L127 27 L127 34 L118 34 L118 55 L111 55 L111 34 L98 34Z','#111'),
+      weapon:pistol(147,112,'#8a929c','#3a4a6a')+pistol(161,92,'#8a929c','#3a4a6a')});
+  },
+  maul(L){ const red='#b81f27', blk='#121214';
+    const [a,b]=[140,132], [c,d]=[166,90];
+    const horns=[[95,15,-8],[102,11,-4],[110,10,2],[117,13,7],[121,20,10],[90,22,-12]].map(([x,y,r])=>P(`M${x-2.4} ${y+2} L${x} ${y-7} L${x+2.4} ${y+2}Z`,'#ece2c6',`transform="rotate(${r} ${x} ${y})"`)).join('');
+    return human({pose:'saber', skin:red, glove:blk, sleeve:'#1b1b20', torso:'#1b1b20',
+      torsoPath:'M80 74 Q103 64 126 74 L130 118 L138 204 L74 204 L78 118Z',
+      torsoDetail:ST('M102 70 L106 204 M90 150 L84 204 M118 150 L126 204','#2a2a30',1.6),
+      legs:legs('#151518','#0c0c0e',246),
+      belt:PV('M79 134 L129 134 L130 146 L80 146Z','#26262c'),
+      collar:P('M90 64 Q104 74 118 64 L120 76 Q104 84 88 76Z','#24242a'),
+      neck:red,
+      head:horns+face({skin:red,eye:'#ffcf1a',brow:blk,mouth:'M106 51.5 Q111 50 116 51.5',
+        extra:P('M96 14 Q100 22 99 29 L103 29 Q104 20 100 13Z',blk)+P('M108 12 Q110 22 109 28 L113 28 Q114 18 112 12Z',blk)+P('M117 15 Q118 23 117 28 L120 28 Q121 21 119 16Z',blk)
+          +P('M99 31.6 Q106 29.4 110 32.6 Q112 30 121.6 31.4 Q122 37.6 117 40 Q111 38 110 36.5 Q106 40.4 100 38.6Z',blk)
+          +`<ellipse cx="104.6" cy="34.6" rx="2.8" ry="2" fill="#ffcf1a"/><circle cx="105.2" cy="34.6" r="1" fill="#600"/><ellipse cx="116.4" cy="34.6" rx="2.2" ry="1.8" fill="#ffcf1a"/><circle cx="116.9" cy="34.6" r=".9" fill="#600"/>`
+          +P('M110 36 L113 44 L116 45 L111 46Z',blk)+P('M100 56 Q108 62 118 54 Q116 50 110 52.5 Q104 52 100 56Z',blk)+P('M93 42 L99 46 L96 52Z',blk)}),
+      weapon:saber(a,b,c,d,L.color,92)+saber(c,d,a,b,L.color,92).replace(/<line x1="[^"]*" y1="[^"]*" x2="[^"]*" y2="[^"]*" stroke="#c4c8ce"[^>]*\/>/,'')});
+  },
+  dooku(L){ const skin='#efc8a6', cape='#1d1512';
+    return human({pose:'saber', skin, sleeve:'#33261f', torso:'#3a2c24',
+      behind:PV('M80 70 Q62 170 58 289 L140 289 Q136 170 126 72Z',cape),
+      legs:legs('#2a201a','#0f0d0c',236),
+      torsoDetail:P('M100 70 L112 70 L118 152 L104 152Z','#2e221c')+ST('M104 72 L108 150','#4a3a30',1.2),
+      belt:belt('#2a201a','#b9bcc2'),
+      collar:P('M86 70 Q104 60 122 70 L118 80 Q104 74 90 80Z',cape)+ST('M93 72 Q104 79 117 72','#c9ccd2',1.6)+`<circle cx="93" cy="72" r="2.6" fill="#c9ccd2"/><circle cx="117" cy="72" r="2.6" fill="#c9ccd2"/>`,
+      head:face({skin,eye:'#3a2a1e',brow:'#d8d8d8',mouth:'M106 52 Q111 51 116 52',extra:ST('M100 26 Q104 24 108 25 M113 47 Q116 44 120 44','rgba(0,0,0,.18)',1)})
+        +P('M94 47 Q99 62 111 71 Q117 62 121 48 Q115 54 108 53 Q100 54 94 47Z','#e8e8e8')+P('M106 49 Q111 46.5 117.5 49 Q112 51 106 50Z','#d4d4d4')
+        +P('M89 36 Q88 11 106 10 Q120 10 123 21 Q112 15 100 18 Q92 22 91 38Z','#dcdcdc')+ST('M94 18 Q104 12 118 15 M92 26 Q100 18 112 17','#b8b8b8',1),
+      weapon:saberPose(L.color,{curved:true,hilt:'#b8a070'})});
+  },
+  grievous(L){ const bone='#e8e1cc', metal='#8f9294', id='gv'+(++ARTUID);
+    let s='';
+    s+=PV('M80 66 Q60 160 56 280 L66 268 L74 282 L84 266 L94 284 L104 268 L114 282 L124 266 L134 280 Q134 160 126 68Z','#6b5f4f');
+    s+=limb('M90 84 Q72 70 64 50',7,metal)+hand(64,49,'#6c6f72',5)+saber(62,56,52,32,'#3ee06a',100);
+    s+=limb('M118 84 Q100 62 92 44',7,metal)+hand(92,43,'#6c6f72',5)+saber(91,50,84,24,'#4aa8ff',100);
+    s+=limb('M86 80 Q84 114 104 124 L146 120',7,metal)+hand(147,121,'#6c6f72',5);
+    s+=ST('M96 150 L92 210 L84 270','#6c6f72',9)+ST('M114 150 L124 210 L132 270','#7c7f82',9)+`<circle cx="92" cy="210" r="6" fill="${metal}"/><circle cx="124" cy="210" r="6" fill="${metal}"/>`;
+    s+=P('M72 288 L84 268 L92 272 L98 289Z','#6c6f72')+P('M122 289 L130 268 L140 270 L156 289Z','#7c7f82')+ST('M140 289 l6 -5 M148 289 l5 -4','#555',1.5);
+    s+=PV('M92 120 Q104 116 118 120 L120 150 Q104 160 90 150Z','#5a4a3a');
+    s+=PV('M84 72 Q104 62 124 72 L126 112 Q104 124 84 112Z',bone)+ST('M88 82 Q104 90 120 82 M88 92 Q104 100 120 92 M88 102 Q104 110 120 102','#b9b09a',1.6);
+    s+=ST('M100 52 L100 72 M108 52 L108 72','#6c6f72',4);
+    s+=PV('M96 0 Q112 -6 124 6 Q130 24 126 46 Q122 58 114 64 Q106 66 102 60 Q96 44 94 24 Q93 8 96 0Z',bone);
+    s+=P('M102 20 Q110 15 117 22 L115 29 Q108 30 103 25Z','#151515')+P('M119 20 Q124 18 127 22 L126 28 Q122 29 120 26Z','#151515');
+    s+=`<ellipse cx="110" cy="23" rx="3.4" ry="2.6" fill="#e8c21a"/><rect x="109.5" y="20.6" width="1" height="4.8" fill="#000"/><ellipse cx="123" cy="23" rx="2.2" ry="2" fill="#e8c21a"/>`;
+    s+=ST('M116 32 L122 44 M104 40 L108 58 M110 42 L113 60 M117 44 L118 58','#a9a089',1.4)+ST('M98 8 Q110 2 122 10','#c9c0aa',1.4);
+    s+=saberPose(L.color);
+    s+=limb('M122 80 Q142 102 152 109',7,metal)+hand(153,109,'#6c6f72',5);
+    return `<g transform="translate(104 290) scale(1.1) translate(-104 -290)">${s}</g>`;
+  },
+  kylo(L){ const blk='#16161a';
+    return human({pose:'saber', skin:'#0e0e10', glove:'#0e0e10', sleeve:'#141418', torso:blk,
+      behind:PV('M80 70 Q62 170 58 289 L140 289 Q136 170 126 72Z','#0e0e12'),
+      torsoPath:'M80 74 Q103 64 126 74 L130 118 L136 214 L74 214 L78 118Z',
+      torsoDetail:(()=>{ let q=''; for(let y=84;y<210;y+=9) q+=ST(`M82 ${y} L128 ${y-1}`,'#24242a',1); return q; })()+ST('M104 72 L106 212','#24242a',1.4),
+      legs:legs('#111114','#0a0a0c',246),
+      belt:belt('#0c0c0e','#b9bcc2'),
+      collar:PV('M84 58 Q104 50 124 58 Q130 74 124 86 Q104 92 84 86 Q78 72 84 58Z','#121216'),
+      head:PV('M89 34 Q88 10 106 9 Q123 10 124 30 L124 52 Q118 62 106 62 Q93 62 89 54Z','#141418')
+        +P('M96 28.5 L124 28.5 L123 34 L113.5 34 L113.5 53 L107 53 L107 34 L96 34Z','#050507')
+        +ST('M95 28 L124.5 28','#c8ccd2',2.2)+ST('M106.5 34 L106.5 53.5 L114 53.5 L114 34','#aeb3ba',1.4)+ST('M94 16 Q106 8 120 14','rgba(255,255,255,.25)',2),
+      weapon:saberPose(L.color,{cross:true,unstable:true,hilt:'#5a5d62'})});
+  },
+  palpatine(L){ const robe='#141017', skin='#d6cbc0';
+    const claw=(x,y)=>ST(`M${x} ${y} l9 -6 M${x} ${y} l10 -1 M${x} ${y} l9 4`,skin,2.2)
+      +ST(`M${x+9} ${y-6} l6 -4 l-2 5 l7 -3 M${x+10} ${y-1} l7 0 l-3 3 l7 0`,L.color,1.4,`style="filter:drop-shadow(0 0 3px ${L.color})"`);
+    return human({pose:'cast', skin, sleeve:robe, torso:robe, armW:18,
+      torsoPath:'M80 70 Q103 60 126 70 L134 130 L150 289 L58 289 L74 130Z',
+      torsoDetail:ST('M96 120 L88 286 M110 124 L116 286 M124 140 L138 286 M84 150 L70 286','#231b27',2),
+      neck:robe,
+      head:PV('M84 46 Q80 4 106 0 Q132 2 131 40 L133 68 Q120 74 106 72 Q92 74 82 68Z',robe)
+        +PV('M96 32 Q96 16 110 16 Q124 18 124 34 Q124 48 116 58 Q108 62 102 56 Q96 46 96 32Z',skin)
+        +ST('M100 24 Q110 20 120 24 M101 28 Q110 25 119 28 M104 46 l4 3 M118 44 l-3 4 M108 56 Q112 52 117 54','#9a8a7c',1.2)
+        +`<ellipse cx="106" cy="35" rx="3.2" ry="2.2" fill="#f2b21a"/><circle cx="106.6" cy="35" r="1" fill="#300"/><ellipse cx="117" cy="35" rx="2.6" ry="2" fill="#f2b21a"/><circle cx="117.4" cy="35" r=".9" fill="#300"/>`
+        +ST('M102 32 Q106 30 110 32.5 M114 32.5 Q117 30.5 121 32','#b42a1a',1.1)+ST('M107 51 Q112 48 118 51','#5a3a30',1.6)
+        +P('M90 32 Q93 9 112 9 Q129 11 129 32 Q122 18 110 18 Q98 20 94 36Z',robe),
+      front:claw(165,90)+claw(153,108)});
+  },
+  vader(L){ const blk='#121216';
+    return `<g transform="translate(104 290) scale(1.1) translate(-104 -290)">`+human({pose:'saber', skin:'#0c0c0e', glove:'#0c0c0e', sleeve:'#141418', torso:blk, armW:17,
+      behind:PV('M76 66 Q48 170 38 289 L164 289 Q148 170 128 68Z','#08080b')+ST('M70 140 Q60 220 56 286 M120 140 Q132 220 140 286','#16161b',3),
+      torsoPath:'M78 74 Q103 62 128 74 L132 118 L136 206 L72 206 L76 118Z',
+      torsoDetail:PV('M76 70 Q90 62 104 64 L102 86 Q88 90 76 86Z','#1c1c22')+PV('M104 64 Q120 62 130 72 L130 86 Q118 90 104 86Z','#1c1c22')
+        +`<rect x="94" y="92" width="24" height="17" rx="2" fill="#2a2a32"/><rect x="97" y="95" width="4" height="3.5" fill="#ff3a3a"/><rect x="102.5" y="95" width="4" height="3.5" fill="#3aff6a"/><rect x="108" y="95" width="4" height="3.5" fill="#3aa0ff"/><rect x="97" y="101" width="18" height="2" fill="#9aa0a8"/><rect x="97" y="105" width="18" height="1.6" fill="#6a6e76"/>`
+        +ST('M86 112 L94 108 M118 108 L126 112','#2a2a32',2)+ST('M104 150 L104 204 M90 160 L84 204 M118 160 L124 204','#1f1f26',1.6),
+      legs:legs('#0f0f12','#08080a',236)+ST('M126 244 L138 244','rgba(255,255,255,.2)',2),
+      belt:PV('M78 134 L130 134 L131 148 L79 148Z','#16161a')+`<rect x="84" y="136" width="10" height="10" rx="1" fill="#a9adb5"/><rect x="100" y="135.5" width="12" height="11" rx="1" fill="#b9bdc5"/><rect x="117" y="136" width="10" height="10" rx="1" fill="#a9adb5"/>`
+        +ST('M102 139 L110 139 M102 142 L110 142','#3a3a42',1),
+      neck:'#1a1a1f',
+      head:PV('M86 34 Q84 4 106 2 Q128 4 128 32 L130 56 L138 68 L120 68 L116 58 L96 58 L92 68 L74 68 L84 56Z','#0d0d10')
+        +ST('M92 16 Q106 4 122 14','rgba(255,255,255,.35)',2.2)
+        +PV('M96 26 Q108 22 124 26 L123 50 Q116 56 113 66 L104 66 Q100 56 96 50Z','#22222a')
+        +P('M99 30 Q104 27 109 31 L108 37.4 Q103 37.4 99 34Z','#060606')+P('M114 31 Q118 27 123 30 L122 35 Q118 37 114 36.4Z','#060606')
+        +`<circle cx="103" cy="31.4" r="1.2" fill="#a33"/><circle cx="117.6" cy="31.4" r="1" fill="#a33"/>`
+        +ST('M111.5 32 L111.5 46','#3a3a44',2)+P('M104 50 L120 50 L112 67Z','#3a3a42')+ST('M106 53 L118 53 M107.5 56.5 L116.5 56.5 M109 60 L115 60 M110.5 63 L113.5 63','#9aa0a8',1)
+        +ST('M98 46 Q102 52 104 56 M123 46 Q121 52 120 56','#8a8e96',1.4),
+      weapon:saberPose(L.color,{hilt:'#c4c8ce'})})+`</g>`;
+  },
+};
+
+function figureSVG(L, flip){
+  const inner=(ART[L.art]||ART.luke)(L);
+  return `<svg viewBox="-14 -50 248 344" xmlns="http://www.w3.org/2000/svg" overflow="visible">`
+    +`<ellipse cx="108" cy="290" rx="58" ry="6" fill="rgba(0,0,0,.28)"/>`
+    +(flip?`<g transform="translate(220,0) scale(-1,1)">${inner}</g>`:inner)+`</svg>`;
+}
+
+/* =====================================================================
+   Battle backgrounds (one per planet). viewBox 1000x500, floor from ~y400.
+   ===================================================================== */
+function grad(id,stops,vertical=true){ return `<linearGradient id="${id}" x1="0" y1="0" x2="${vertical?0:1}" y2="${vertical?1:0}">${stops.map(([o,c,a])=>`<stop offset="${o}" stop-color="${c}"${a!=null?` stop-opacity="${a}"`:''}/>`).join('')}</linearGradient>`; }
+function starsSVG(n,seed,maxY=380,op=.8){ const r=rng(seed); let s=''; for(let i=0;i<n;i++) s+=`<circle cx="${(r()*1000).toFixed(0)}" cy="${(r()*maxY).toFixed(0)}" r="${(r()*1.3+.3).toFixed(1)}" fill="#fff" opacity="${(r()*op+.15).toFixed(2)}"/>`; return s; }
+const SCENES = {
+  tatooine(){ let s=`<defs>${grad('sk',[[0,'#eea862'],[.75,'#fde2ae']])}<radialGradient id="sun"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#fff3c4" stop-opacity=".9"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient></defs>`;
+    s+=`<rect width="1000" height="500" fill="url(#sk)"/><circle cx="660" cy="110" r="110" fill="url(#sun)"/><circle cx="660" cy="110" r="24" fill="#fffbe8"/><circle cx="760" cy="160" r="80" fill="url(#sun)" opacity=".8"/><circle cx="760" cy="160" r="16" fill="#ffe2a8"/>`;
+    s+=P('M0 340 L30 338 L52 262 L70 256 L150 252 L168 260 L186 338 L300 344 L0 352Z','#c98a55','opacity=".55"')+P('M820 344 L850 290 L940 284 L960 340Z','#c98a55','opacity=".5"');
+    s+=P('M0 360 Q150 318 300 348 T600 344 T1000 336 L1000 500 L0 500Z','#e9bb7c')+P('M0 392 Q200 366 420 390 T1000 380 L1000 500 L0 500Z','#dca664');
+    s+=P('M190 392 Q250 330 310 392Z','#ecdcbe')+P('M190 392 Q250 330 310 392Z','url(#vol)')+P('M236 392 Q250 368 264 392Z','#5a3c26')+`<rect x="282" y="356" width="10" height="8" rx="2" fill="#bba888"/><rect x="214" y="364" width="8" height="6" rx="2" fill="#bba888"/>`;
+    s+=`<rect x="836" y="262" width="8" height="132" fill="#9a958c"/>`+[290,318,346].map(y=>`<rect x="826" y="${y}" width="28" height="6" rx="2" fill="#b3ada2"/>`).join('')+ST('M840 262 L840 236 M832 246 L848 246','#8a857c',2);
+    s+=P('M0 420 Q500 404 1000 420 L1000 500 L0 500Z','#d29a59')+ST('M60 450 Q140 440 220 452 M300 470 Q420 456 520 470 M620 446 Q720 436 820 448 M700 480 Q820 468 940 482','#bd874a',3);
+    s+=`<ellipse cx="120" cy="430" rx="34" ry="9" fill="#a8743f"/><ellipse cx="900" cy="440" rx="44" ry="11" fill="#a8743f"/>`; return s; },
+  kamino(){ let s=`<defs>${grad('sk',[[0,'#1f2833'],[.7,'#5b6c7e']])}${grad('fl',[[0,'#c4ced6'],[1,'#8a98a4']])}</defs><rect width="1000" height="500" fill="url(#sk)"/>`;
+    s+=[[120,90,200,40],[460,60,260,46],[820,110,240,40],[300,160,220,30]].map(([x,y,rx,ry])=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#2b3642" opacity=".7"/>`).join('');
+    s+=`<rect y="300" width="1000" height="130" fill="#22303d"/>`+ST('M0 320 Q30 314 60 320 T120 320 T180 320 M400 340 Q430 334 460 340 T520 340 M700 316 Q730 310 760 316 T820 316 M200 360 Q230 354 260 360 T320 360 M820 362 Q850 356 880 362 T940 362','#6f849a',2);
+    for(const [x,w] of [[90,110],[260,70],[700,90],[890,120]]){ s+=ST(`M${x-w*.3} 300 L${x-w*.3} 334 M${x} 300 L${x} 338 M${x+w*.3} 300 L${x+w*.3} 334`,'#8796a4',3)+`<ellipse cx="${x}" cy="296" rx="${w/2}" ry="${w/5}" fill="#c9d3dc"/><ellipse cx="${x}" cy="290" rx="${w/2.6}" ry="${w/6}" fill="#dfe6ec"/><rect x="${x-w*.35}" y="292" width="${w*.7}" height="3" fill="#6f8496"/>`; }
+    s+=P('M0 402 L1000 402 L1000 500 L0 500Z','url(#fl)')+ST('M0 402 L1000 402','#e6edf2',3)+ST('M150 402 L60 500 M350 402 L320 500 M650 402 L680 500 M850 402 L940 500','#7d8b97',1.6);
+    s+=`<ellipse cx="300" cy="455" rx="90" ry="8" fill="#a9b8c4" opacity=".7"/><ellipse cx="760" cy="440" rx="70" ry="6" fill="#a9b8c4" opacity=".7"/>`;
+    let rain='<g class="rain">'; const r=rng(5); for(let i=0;i<120;i++){ const x=r()*1100-50, y=r()*1000-500; rain+=`<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x-8).toFixed(0)}" y2="${(y+26).toFixed(0)}" stroke="#d6e6f5" stroke-width="1.2" opacity=".35"/>`; }
+    return s+rain+'</g>'; },
+  naboo(){ let s=`<defs>${grad('sk',[[0,'#6fb5e8'],[.7,'#dff2ff']])}${grad('fl',[[0,'#ddd2b8'],[1,'#b9ad92']])}</defs><rect width="1000" height="500" fill="url(#sk)"/>`;
+    s+=[[150,80,70,18],[200,70,50,16],[700,60,90,20],[770,74,60,16]].map(([x,y,rx,ry])=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".85"/>`).join('');
+    s+=P('M0 300 L80 200 L160 240 L240 170 L330 250 L330 400 L0 400Z','#5a8f5c')+P('M680 260 L760 180 L860 210 L940 160 L1000 190 L1000 400 L680 400Z','#4f8452');
+    s+=`<rect x="150" y="230" width="14" height="170" fill="#eef8ff" opacity=".7"/><rect x="880" y="200" width="16" height="200" fill="#eef8ff" opacity=".7"/>`;
+    for(const [x,w,h,dome] of [[360,90,140,1],[460,120,190,1],[590,90,130,1],[660,60,100,0],[300,60,90,0]]){
+      s+=PV(`M${x} 400 L${x} ${400-h} L${x+w} ${400-h} L${x+w} 400Z`,'#eadfc4');
+      for(let cx=x+10;cx<x+w-6;cx+=16) s+=`<rect x="${cx}" y="${400-h+22}" width="6" height="${h-30}" fill="#d6c9aa"/>`;
+      if(dome) s+=`<path d="M${x-4} ${400-h} Q${x+w/2} ${400-h-w*.7} ${x+w+4} ${400-h}Z" fill="#4f8f80"/><path d="M${x-4} ${400-h} Q${x+w/2} ${400-h-w*.7} ${x+w+4} ${400-h}Z" fill="url(#vol)"/>`;
+    }
+    s+=`<rect x="0" y="396" width="1000" height="12" fill="#5fa05a"/>`+P('M0 404 L1000 404 L1000 500 L0 500Z','url(#fl)')+ST('M0 440 L1000 440 M0 474 L1000 474 M120 404 L90 500 M300 404 L290 500 M500 404 L500 500 M700 404 L710 500 M880 404 L910 500','#a89c80',1.4);
+    return s; },
+  geonosis(){ let s=`<defs>${grad('sk',[[0,'#c9542a'],[.75,'#f3a160']])}</defs><rect width="1000" height="500" fill="url(#sk)"/><circle cx="820" cy="120" r="40" fill="#ffd9a0" opacity=".6"/>`;
+    s+=P('M40 400 Q60 200 80 160 Q100 200 120 400Z','#8f4424','opacity=".7"')+P('M880 400 Q900 220 916 180 Q934 230 950 400Z','#8f4424','opacity=".7"')+P('M120 400 Q130 270 146 250 Q160 280 170 400Z','#8f4424','opacity=".6"');
+    s+=P('M160 400 L160 250 Q500 200 840 250 L840 400Z','#a85a32');
+    for(let i=0;i<9;i++){ const x=200+i*72, y=246-Math.sin(Math.PI*(i+.5)/9)*28; s+=P(`M${x} ${y+60} L${x} ${y+28} Q${x+20} ${y+8} ${x+40} ${y+28} L${x+40} ${y+60}Z`,'#6e3418'); }
+    s+=ST('M160 310 Q500 270 840 310','#8a4626',6);
+    for(const x of [330,500,670]) s+=PV(`M${x-12} 410 L${x-9} 250 L${x+9} 250 L${x+12} 410Z`,'#7d3c20')+`<rect x="${x-16}" y="244" width="32" height="10" fill="#6a3018"/>`+ST(`M${x-10} 300 l20 6 M${x-10} 330 l20 -6`,'#3a2a20',2);
+    s+=P('M0 404 Q500 392 1000 404 L1000 500 L0 500Z','#b5653a')+`<ellipse cx="220" cy="450" rx="80" ry="10" fill="#9c5530"/><ellipse cx="780" cy="470" rx="100" ry="12" fill="#9c5530"/>`;
+    return s; },
+  utapau(){ let s=`<defs>${grad('sk',[[0,'#a5c4c8'],[.8,'#efe6c8']])}</defs><rect width="1000" height="500" fill="url(#sk)"/>`;
+    s+=P('M260 0 L740 0 L760 400 L240 400Z','#c2ae86');
+    for(let y=40;y<400;y+=36) s+=ST(`M250 ${y} L750 ${y}`,'#ad9870',2);
+    s+=PV('M0 0 L300 0 Q260 120 290 240 Q250 320 280 410 L0 410Z','#a58f68')+PV('M1000 0 L700 0 Q740 140 710 260 Q750 330 720 410 L1000 410Z','#a58f68');
+    for(const [x,y,w] of [[200,120,110],[230,260,90],[780,90,120],[760,240,100],[420,180,70],[580,280,80]]){ s+=`<ellipse cx="${x}" cy="${y}" rx="${w/2}" ry="${w/7}" fill="#8f7a56"/><ellipse cx="${x}" cy="${y-4}" rx="${w/2}" ry="${w/8}" fill="#c9b48c"/>`;
+      for(let k=-1;k<=1;k++) s+=`<rect x="${x+k*w/4-4}" y="${y-w/8-10}" width="8" height="10" rx="3" fill="#4a3c28"/>`; }
+    s+=`<rect y="396" width="1000" height="104" fill="#8d877a"/>`+`<ellipse cx="500" cy="450" rx="300" ry="34" fill="none" stroke="#c9b25a" stroke-width="4"/><ellipse cx="500" cy="450" rx="200" ry="22" fill="none" stroke="#c9b25a" stroke-width="2" stroke-dasharray="10 8"/>`+ST('M0 400 L1000 400','#a8a294',4);
+    return s; },
+  starkiller(){ let s=`<defs>${grad('sk',[[0,'#0b0f1b'],[.8,'#33415c']])}${grad('fl',[[0,'#f2f7fb'],[1,'#c4d3df']])}</defs><rect width="1000" height="500" fill="url(#sk)"/>${starsSVG(80,3,260)}`;
+    s+=`<path d="M-20 60 L1020 200" stroke="#ff4a2a" stroke-width="10" style="filter:drop-shadow(0 0 10px #ff3a1a) drop-shadow(0 0 30px #ff3a1a)"/><path d="M-20 60 L1020 200" stroke="#ffd0b0" stroke-width="3"/>`;
+    const r=rng(9); for(let i=0;i<34;i++){ const x=r()*1040-20, h=90+r()*120, w=h*.32, b=380+r()*30; s+=P(`M${x} ${b-h} L${x+w} ${b} L${x-w} ${b}Z`,i%2?'#13202a':'#182832')+P(`M${x} ${b-h} L${x+w*.4} ${b-h*.6} L${x-w*.4} ${b-h*.6}Z`,'#e9f1f7','opacity=".85"'); }
+    s+=P('M0 392 Q500 380 1000 392 L1000 500 L0 500Z','url(#fl)')+`<ellipse cx="300" cy="440" rx="120" ry="10" fill="#c4d3df"/><ellipse cx="760" cy="470" rx="140" ry="12" fill="#c4d3df"/>`;
+    let snow='<g class="snow">'; const r2=rng(4); for(let i=0;i<90;i++) snow+=`<circle cx="${(r2()*1000).toFixed(0)}" cy="${(r2()*1000-500).toFixed(0)}" r="${(r2()*2+1).toFixed(1)}" fill="#fff" opacity=".8"/>`;
+    return s+snow+'</g>'; },
+  exegol(){ let s=`<defs>${grad('sk',[[0,'#050309'],[.85,'#2a1a40']])}${grad('fl',[[0,'#1c1626'],[1,'#0c0910']])}</defs><rect width="1000" height="500" fill="url(#sk)"/>`;
+    s+=`<g class="flash">`+ST('M180 0 L200 60 L170 90 L210 170','#c6b2ff',3,'style="filter:drop-shadow(0 0 8px #a68aff)"')+ST('M760 0 L740 50 L780 80 L750 150 L770 190','#c6b2ff',2.5,'style="filter:drop-shadow(0 0 8px #a68aff)"')+`</g>`;
+    for(const [x,w,h] of [[40,90,420],[190,60,330],[810,70,360],[920,100,440],[330,40,260],[660,46,280]]) s+=PV(`M${x} 410 L${x+w*.18} ${410-h} L${x+w*.82} ${410-h} L${x+w} 410Z`,'#17121f')+ST(`M${x+w*.18} ${410-h} L${x+w*.18+4} 410`,'#2c2238',2);
+    s+=P('M440 400 L450 250 L470 230 L490 260 L510 260 L530 230 L550 250 L560 400Z','#0e0a14')+P('M470 300 L530 300 L528 330 L472 330Z','#1c1626');
+    s+=P('M0 400 L1000 400 L1000 500 L0 500Z','url(#fl)')+ST('M0 430 L1000 430 M0 466 L1000 466 M200 400 L100 500 M500 400 L500 500 M800 400 L900 500','#2c2440',1.4)+`<ellipse cx="500" cy="440" rx="320" ry="20" fill="#6a7ad8" opacity=".08"/>`;
+    return s; },
+  deathstar(){ let s=`<defs>${grad('fl',[[0,'#3a3e46'],[1,'#1a1c22']])}<radialGradient id="moon" cx=".35" cy=".35"><stop offset="0" stop-color="#7aa86a"/><stop offset="1" stop-color="#2c4a2a"/></radialGradient></defs>`;
+    s+=`<rect width="1000" height="500" fill="#16191f"/>`+[[0,90],[880,90]].map(([x,w])=>`<rect x="${x}" y="0" width="${w+30}" height="400" fill="#1e2128"/>`).join('');
+    s+=`<circle cx="500" cy="220" r="200" fill="#030408"/>`+`<clipPath id="win"><circle cx="500" cy="220" r="200"/></clipPath><g clip-path="url(#win)">${starsSVG(70,8,500).replace(/cx="(\d+)"/g,(m,x)=>`cx="${300+(+x)*.4}"`)}<circle cx="640" cy="330" r="110" fill="url(#moon)"/></g>`;
+    for(let i=0;i<8;i++){ const a=i*Math.PI/4; s+=`<line x1="${500+Math.cos(a)*60}" y1="${220+Math.sin(a)*60}" x2="${500+Math.cos(a)*200}" y2="${220+Math.sin(a)*200}" stroke="#2a2e36" stroke-width="12"/>`; }
+    s+=`<circle cx="500" cy="220" r="200" fill="none" stroke="#2a2e36" stroke-width="26"/><circle cx="500" cy="220" r="60" fill="none" stroke="#2a2e36" stroke-width="10"/><circle cx="500" cy="220" r="125" fill="none" stroke="#2a2e36" stroke-width="6"/>`;
+    for(let y=40;y<380;y+=50) s+=`<rect x="30" y="${y}" width="40" height="22" fill="#262a32"/><rect x="34" y="${y+8}" width="8" height="5" fill="${y%100?'#ff4a3a':'#4ab0ff'}" opacity=".7"/><rect x="930" y="${y}" width="40" height="22" fill="#262a32"/><rect x="958" y="${y+8}" width="8" height="5" fill="${y%100?'#4ab0ff':'#ff4a3a'}" opacity=".7"/>`;
+    s+=P('M0 396 L1000 396 L1000 500 L0 500Z','url(#fl)')+ST('M0 396 L1000 396','#5a5e66',3)+ST('M0 430 L1000 430 M0 470 L1000 470 M100 396 L40 500 M300 396 L280 500 M500 396 L500 500 M700 396 L720 500 M900 396 L960 500','#2a2d34',1.6);
+    return s; },
+};
+function sceneSVG(id){ return `<svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">${(SCENES[id]||SCENES.deathstar)()}</svg>`; }
+
+/* =====================================================================
+   Math questions
+   ===================================================================== */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+function addHint(a,b){
+  const s=a+b;
+  if (a>=10 && b>=10){
+    const ta=a-a%10, tb=b-b%10, oa=a%10, ob=b%10;
+    return t('h.addSplit',ta,tb,oa,ob,s);
+  }
+  const big=Math.max(a,b), small=Math.min(a,b);
+  if (big<10 && s>10){ const need=10-big; return t('h.makeTen',big,need,small-need,s); }
+  if (small<=5){ let seq=[]; for(let i=1;i<=small;i++) seq.push(big+i); return t('h.countUp',big,small,seq.join(', ')); }
+  return t('h.addGen',a,b,s);
+}
+function subHint(a,b){
+  const d=a-b;
+  if (b===0) return t('h.sub0',a);
+  if (b<=5 && a<=20){ let seq=[]; for(let i=1;i<=b;i++) seq.push(a-i); return t('h.countBack',a,b,seq.join(', ')); }
+  if (b>=10){ const tb=b-b%10, ob=b%10; return t('h.subTens',a,tb,ob,a-tb,d); }
+  return t('h.subUp',a,b,d);
+}
+function mulHint(a,b){
+  const p=a*b;
+  if (b===1||a===1) return t('h.mul1',p);
+  if (b===10||a===10) return t('h.mul10',p);
+  const n=Math.min(a,b), m=Math.max(a,b);
+  if (n<=5){ let seq=[]; for(let i=1;i<=n;i++) seq.push(m*i); return t('h.mulSkip',m,n,seq.join(', ')); }
+  return t('h.mulSplit',m,n,p);
+}
+function bigMulHint(a,b){
+  const tn=a-a%10, o=a%10;
+  return t('h.bigMul',a,b,tn,o);
+}
+
+const Q = {
+  add(max){ const a=rnd(Math.max(0,Math.floor(max*.15)),max-1), b=rnd(1,max-a); return {text:`${a} + ${b}`, ans:a+b, traps:[a+b+10,a+b-10,Math.abs(a-b)], hint:addHint(a,b)}; },
+  sub(max){ const a=rnd(Math.max(2,Math.floor(max*.3)),max), b=rnd(1,a); return {text:`${a} − ${b}`, ans:a-b, traps:[a+b,a-b+10,a-b-10], hint:subHint(a,b)}; },
+  missAdd(max){ const a=rnd(1,max-2), c=rnd(a+1,max); return {text:`${a} + ? = ${c}`, ans:c-a, traps:[c+a,c], label:'missing', hint:t('h.missAdd',a,c)}; },
+  mul(tables,maxB){ let a=pick(tables), b=rnd(1,maxB); if(Math.random()<.5)[a,b]=[b,a]; return {text:`${a} × ${b}`, ans:a*b, traps:[a+b,a*(b+1),a*(b-1),(a+1)*b,(a-1)*b], hint:mulHint(a,b)}; },
+  div(tables,maxQ){ const b=pick(tables), q=rnd(1,maxQ), a=b*q; return {text:`${a} ÷ ${b}`, ans:q, traps:[a-b,q+1,q-1,b], hint:t('h.div',a,b,q)}; },
+  missMul(tables){ const a=pick(tables), b=rnd(2,10); return {text:`${a} × ? = ${a*b}`, ans:b, traps:[a*b-a,b+1,b-1], label:'missing', hint:t('h.missMul',a,b)}; },
+  bigMul(maxA){ const a=rnd(12,maxA), b=rnd(3,9); return {text:`${a} × ${b}`, ans:a*b, traps:[(a-a%10)*b+a%10,a*b+10,a*b-10,a*b+b,a*b-b], hint:bigMulHint(a,b)}; },
+  order(){ const a=rnd(2,20), b=rnd(2,9), c=rnd(2,9);
+    if (Math.random()<.5) return {text:`${a} + ${b} × ${c}`, ans:a+b*c, traps:[(a+b)*c], label:'order', hint:t('h.orderAdd',a,b,c)};
+    const big=b*c+a; return {text:`${big} − ${b} × ${c}`, ans:big-b*c, traps:[(big-b)*c,big-b-c], label:'order', hint:t('h.orderSub',big,b,c)}; },
+  paren(){ const a=rnd(2,12), b=rnd(2,9), c=rnd(2,9); return {text:`(${a} + ${b}) × ${c}`, ans:(a+b)*c, traps:[a+b*c], label:'paren', hint:t('h.paren',a,b,c)}; },
+  percent(){ const p=pick([10,25,50,20]), base={10:10,25:4,50:2,20:5}[p], n=base*rnd(2,25);
+    return {text:t('q.percent',p,n), ans:n*p/100, traps:[n/2,n/10,n/4,n-p], hint:t('h.percent',p,t('h.pctWord')[p],n)}; },
+  ewokAdd(max){ const a=rnd(1,max-1), b=rnd(1,max-a); return {text:`${a} + ${b}`, ans:a+b, vis:[a,'+',b], label:'count', nChoices:3, hint:t('h.ewokAdd',Array.from({length:a+b},(_,i)=>i+1).join(', '))}; },
+  ewokSub(max){ const a=rnd(2,max), b=rnd(1,a-1); return {text:`${a} − ${b}`, ans:a-b, vis:[a,'−',b], label:'count', nChoices:3, hint:t('h.ewokSub',a,b,a-b)}; },
+  square(){ const n=rnd(2,15); return {text:`${n}²`, ans:n*n, traps:[n*2,n*n+n,n*n-n], hint:t('h.square',n)}; },
+};
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+// Five options (three on the Ewok level): the answer, up to two "common mistake" traps, then nearby numbers.
+function makeChoices(q){
+  const a=q.ans, out=new Set([a]), N=q.nChoices||5;
+  const ok=v=>Number.isInteger(v)&&v>=0&&!out.has(v);
+  for(const t of shuffle((q.traps||[]).slice())){ if(out.size>=3) break; if(ok(t)) out.add(t); }
+  const near=shuffle([a+1,a-1,a+2,a-2,a+3,a-3,...(a>=20?[a+10,a-10]:[])]);
+  for(const v of near){ if(out.size>=N) break; if(ok(v)) out.add(v); }
+  for(let g=4; out.size<N; g++) if(ok(a+g)) out.add(a+g);
+  return shuffle([...out]);
+}
+function makeQuestion(diff,lvl){
+  const t=lvl/7, k=[];
+  if (diff==='ewok'){
+    const m=lvl<3?5:(lvl<6?7:10);
+    k.push(()=>Q.ewokAdd(m),()=>Q.ewokAdd(m));
+    if (lvl>=1) k.push(()=>Q.ewokSub(m));
+  } else if (diff==='youngling'){
+    const m=10+Math.round(t*10);
+    k.push(()=>Q.add(m),()=>Q.add(m),()=>Q.sub(m),()=>Q.sub(m));
+    if (lvl>=4) k.push(()=>Q.missAdd(m));
+  } else if (diff==='padawan'){
+    const m=20+Math.round(t*80);
+    k.push(()=>Q.add(m),()=>Q.sub(m));
+    if (lvl>=2) k.push(()=>Q.mul(lvl>=5?[2,3,4,5,10]:[2,5,10],10));
+    if (lvl>=4) k.push(()=>Q.missAdd(m));
+    if (lvl>=6) k.push(()=>Q.div([2,5,10],10));
+  } else if (diff==='knight'){
+    const m=100+Math.round(t*900);
+    const tb = lvl>=4 ? [3,4,6,7,8,9,11,12] : [2,3,4,5,6,7,8,9];
+    k.push(()=>Q.add(m),()=>Q.sub(m),()=>Q.mul(tb,10),()=>Q.mul(tb,10),()=>Q.div(tb,10));
+    if (lvl>=3) k.push(()=>Q.missMul(tb));
+  } else {
+    k.push(()=>Q.bigMul(25+lvl*10),()=>Q.div([6,7,8,9,11,12],12),()=>Q.order(),()=>Q.percent(),()=>Q.square());
+    if (lvl>=3) k.push(()=>Q.paren(),()=>Q.mul([11,12,13,14,15],12));
+  }
+  let q, tries=0;
+  do { q=pick(k)(); } while (B && B.q && q.text===B.q.text && tries++<10);
+  return q;
+}
+
+/* =====================================================================
+   Sound (tiny synth, no files)
+   ===================================================================== */
+let AC=null;
+function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); return AC; }
+function tone(f,dur,type='sine',vol=.12,f2,delay=0){
+  if(!S.sound) return; const c=ac(); if(!c) return;
+  const t0=c.currentTime+delay, o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(f,t0); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t0+dur);
+  g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g).connect(c.destination); o.start(t0); o.stop(t0+dur+.02);
+}
+const SFX={
+  key(){ tone(700,.05,'square',.03); },
+  saber(){ tone(120,.45,'sawtooth',.09,520); tone(90,.5,'sawtooth',.05,300); },
+  clash(){ tone(1800,.12,'square',.05,600,.18); tone(300,.25,'sawtooth',.06,80,.18); },
+  blaster(){ tone(1600,.2,'square',.06,180); },
+  zap(){ for(let i=0;i<5;i++) tone(rnd(300,1400),.08,'sawtooth',.05,rnd(80,300),i*.07); },
+  wrong(){ tone(180,.4,'sawtooth',.08,70); },
+  win(){ [523,659,784,1047,784,1047].forEach((f,i)=>tone(f,.28,'triangle',.12,null,i*.13)); },
+  lose(){ [392,349,311,262].forEach((f,i)=>tone(f,.35,'triangle',.11,null,i*.22)); },
+  fly(){ tone(80,1.3,'sawtooth',.05,900); },
+};
+
+/* =====================================================================
+   Starfield
+   ===================================================================== */
+(function stars(){
+  const cv=document.getElementById('stars'), cx=cv.getContext('2d'); let st=[];
+  function size(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio;
+    st=Array.from({length:Math.round(innerWidth*innerHeight/2600)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4*devicePixelRatio+.3,p:Math.random()*6}));}
+  size(); addEventListener('resize',size);
+  (function loop(t){ cx.clearRect(0,0,cv.width,cv.height);
+    for(const s of st){ cx.globalAlpha=.45+.55*Math.abs(Math.sin(t/1400+s.p)); cx.fillStyle='#fff'; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,7); cx.fill(); }
+    requestAnimationFrame(loop); })(0);
+})();
+
+/* =====================================================================
+   Screens
+   ===================================================================== */
+const $=id=>document.getElementById(id);
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id)); }
+function modal(html){ $('modalBox').innerHTML=html; $('modal').classList.add('on'); }
+function closeModal(){ $('modal').classList.remove('on'); }
+function hero(){ return HEROES.find(h=>h.id===S.hero)||HEROES[0]; }
+function applyLang(){
+  document.documentElement.lang=S.lang==='no'?'nb':'en';
+  localizeData();
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.innerHTML=t(el.dataset.i18n));
+  if($('select').classList.contains('on')) renderSelect();
+  if($('map').classList.contains('on')) drawMap();
+  if($('battle').classList.contains('on')&&B){ const p=PLANETS[B.pi]; $('bPlanet').textContent=p.name; $('tagHero').textContent=hero().name; $('tagFoe').textContent=p.foe.name; $('qlabel').textContent=t('lbl.'+(B.q.label||'pick')); }
+}
+function openSettings(){
+  const on=(c)=>c?'':' ghost';
+  modal(`<h2>${t('set.title')}</h2>
+    <p class="lab">${t('set.lang')}</p><div class="row seg"><button class="btn${on(S.lang==='no')}" data-lang="no">🇳🇴 Norsk</button><button class="btn${on(S.lang==='en')}" data-lang="en">🇬🇧 English</button></div>
+    <p class="lab">${t('set.sound')}</p><div class="row seg"><button class="btn${on(S.sound)}" data-snd="1">🔊 ${t('set.on')}</button><button class="btn${on(!S.sound)}" data-snd="0">🔇 ${t('set.off')}</button></div>
+    <div class="row" style="margin-top:24px"><button class="btn" id="setDone">${t('set.done')}</button></div>`);
+  $('modalBox').querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{ S.lang=b.dataset.lang; save(); applyLang(); openSettings(); });
+  $('modalBox').querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{ S.sound=b.dataset.snd==='1'; save(); if(S.sound) SFX.key(); openSettings(); });
+  $('setDone').onclick=closeModal;
+}
+['setBtn0','setBtn1','setBtn2'].forEach(id=>$(id).onclick=()=>{ ac(); openSettings(); });
+
+/* ---- title / crawl ---- */
+if (S.hero) $('continueBtn').style.display='';
+$('startBtn').onclick=()=>{ ac(); if (S.hero && S.conquered>0 && !confirm(t('confirm.new'))) return;
+  const keep={sound:S.sound, lang:S.lang}; S=Object.assign(freshSave(),keep); save(); playCrawl(); };
+$('continueBtn').onclick=()=>{ ac(); openMap(); };
+let crawlTimer=null;
+function playCrawl(){
+  show('crawl'); const c=$('crawl');
+  c.querySelectorAll('.far,.text').forEach(el=>{ el.style.animation='none'; el.offsetHeight; el.style.animation=''; });
+  clearTimeout(crawlTimer); crawlTimer=setTimeout(openSelect,38000);
+}
+$('skipBtn').onclick=e=>{ e.stopPropagation(); openSelect(); };
+$('crawl').onclick=()=>openSelect();
+
+/* ---- select ---- */
+let pickHero=null, pickDiff=null;
+function openSelect(){
+  clearTimeout(crawlTimer);
+  pickHero=S.hero||null; pickDiff=S.diff||'padawan';
+  renderSelect(); show('select'); $('select').scrollTop=0;
+}
+function renderSelect(){
+  $('heroes').innerHTML=HEROES.map(h=>`<div class="card${h.id===pickHero?' sel':''}" data-id="${h.id}">${figureSVG(h.look)}<div class="nm">${h.name}</div></div>`).join('');
+  $('diffs').innerHTML=DIFF_ORDER.map(k=>`<div class="diff${k===pickDiff?' sel':''}" data-k="${k}"><b>${DIFFS[k].name}</b><small>${DIFFS[k].age}</small><div>${DIFFS[k].desc}</div></div>`).join('');
+  $('heroes').querySelectorAll('.card').forEach(el=>el.onclick=()=>{ pickHero=el.dataset.id; SFX.saber(); $('heroes').querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c===el)); });
+  $('diffs').querySelectorAll('.diff').forEach(el=>el.onclick=()=>{ pickDiff=el.dataset.k; SFX.key(); $('diffs').querySelectorAll('.diff').forEach(c=>c.classList.toggle('sel',c===el)); });
+}
+$('goBtn').onclick=()=>{
+  if(!pickHero){ $('heroes').animate([{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'none'}],{duration:300}); return; }
+  S.hero=pickHero; S.diff=pickDiff; S.seenCrawl=true; save(); openMap();
+};
+
+/* ---- map ---- */
+let shipPos={x:START.x,y:START.y}, shipAng=0, flying=false;
+function nodePos(i){ return i<0 ? START : PLANETS[i]; }
+function planetArt(p,i){
+  const {x,y,r}=p, id=`g-${p.id}`, clip=`c-${p.id}`;
+  let g=`<defs><radialGradient id="${id}" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="${p.c[0]}"/><stop offset="1" stop-color="${p.c[1]}"/></radialGradient><clipPath id="${clip}"><circle cx="${x}" cy="${y}" r="${r}"/></clipPath></defs>`;
+  g+=`<circle cx="${x}" cy="${y}" r="${r+14}" fill="${p.c[0]}" opacity=".10"/><circle cx="${x}" cy="${y}" r="${r+5}" fill="${p.c[0]}" opacity=".16"/>`;
+  if (p.id==='geonosis') g+=`<ellipse cx="${x}" cy="${y}" rx="${r+22}" ry="8" fill="none" stroke="#e6a070" stroke-width="3" opacity=".6" transform="rotate(-14 ${x} ${y})"/>`;
+  g+=`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#${id})"/><g clip-path="url(#${clip})">`;
+  const R=rng(p.id.length*97+i);
+  if (p.id==='tatooine') for(let k=0;k<5;k++) g+=ST(`M${x-r} ${y-r+10+k*12} Q${x} ${y-r+4+k*12+R()*8} ${x+r} ${y-r+12+k*12}`,'#b97a3a',2.5,'opacity=".45"');
+  if (p.id==='kamino') g+=`<ellipse cx="${x-6}" cy="${y-8}" rx="${r}" ry="7" fill="#fff" opacity=".35"/><ellipse cx="${x+8}" cy="${y+10}" rx="${r}" ry="6" fill="#fff" opacity=".3"/>`;
+  if (p.id==='naboo') g+=P(`M${x-24} ${y-14} q10 -12 22 -6 q6 12 -8 16z M${x+2} ${y+4} q14 -6 22 6 q-8 14 -22 6z M${x-14} ${y+14} q8 -2 10 6 q-6 6 -12 0z`,'#3a7a3a','opacity=".8"')+`<ellipse cx="${x+4}" cy="${y-14}" rx="16" ry="4" fill="#fff" opacity=".5"/>`;
+  if (p.id==='geonosis') for(let k=0;k<6;k++) g+=`<circle cx="${x-r+R()*2*r}" cy="${y-r+R()*2*r}" r="${2+R()*4}" fill="#7a3418" opacity=".5"/>`;
+  if (p.id==='utapau') for(let k=0;k<7;k++) g+=`<circle cx="${x-r+6+R()*(2*r-12)}" cy="${y-r+6+R()*(2*r-12)}" r="${2+R()*5}" fill="#4a3c22" opacity=".8"/>`;
+  if (p.id==='starkiller') g+=`<rect x="${x-r}" y="${y-3}" width="${2*r}" height="7" fill="#3a4654"/><circle cx="${x+4}" cy="${y}" r="7" fill="#ff5a3a" style="filter:drop-shadow(0 0 6px #ff3a1a)"/>`+`<ellipse cx="${x}" cy="${y-r+6}" rx="${r}" ry="10" fill="#fff" opacity=".5"/>`;
+  if (p.id==='exegol') g+=ST(`M${x-14} ${y-24} l6 12 l-6 4 l10 14 M${x+10} ${y-10} l-4 8 l6 2 l-4 10`,'#c8a8ff',2,'style="filter:drop-shadow(0 0 4px #a68aff)"');
+  if (p.deathstar){
+    for(let k=-3;k<=3;k++) g+=ST(`M${x-r} ${y+k*12} L${x+r} ${y+k*12}`,'#80848c',.8,'opacity=".6"');
+    for(let k=0;k<26;k++) g+=`<rect x="${(x-r+R()*2*r).toFixed(0)}" y="${(y-r+R()*2*r).toFixed(0)}" width="${(3+R()*8).toFixed(0)}" height="2" fill="#6a6e76"/>`;
+    g+=`<rect x="${x-r}" y="${y+1}" width="${2*r}" height="4" fill="#3e424a"/>`;
+    g+=`<circle cx="${x-16}" cy="${y-17}" r="13" fill="#8a8f97" stroke="#4a4e56" stroke-width="2"/><circle cx="${x-16}" cy="${y-17}" r="8" fill="none" stroke="#5a5e66" stroke-width="1.5"/><circle cx="${x-16}" cy="${y-17}" r="3" fill="#3a3e46"/>`
+      +ST(`M${x-16} ${y-30} L${x-16} ${y-4} M${x-29} ${y-17} L${x-3} ${y-17}`,'#5a5e66',1);
+  }
+  g+=`</g><circle cx="${x}" cy="${y}" r="${r}" fill="url(#sph)"/>`;
+  if (p.id==='tatooine') g+=`<circle cx="${x+48}" cy="${y-34}" r="7" fill="#fff4b0" style="filter:drop-shadow(0 0 6px #ffe680)"/><circle cx="${x+62}" cy="${y-22}" r="5" fill="#ffc46b" style="filter:drop-shadow(0 0 5px #ffb04a)"/>`;
+  return g;
+}
+function shipSVG(){ // the Millennium Falcon, seen from above, pointing right
+  return `<g id="ship"><g transform="scale(1.15)">
+    <path d="M-18 -4 Q-22 0 -18 4" stroke="#7cf" stroke-width="5" fill="none" style="filter:drop-shadow(0 0 5px #6cf)"/>
+    <path d="M-1 -19 A19 19 0 1 0 -1 19 L10 15 L28 13 L28 3.5 L13 3.5 L13 -3.5 L28 -3.5 L28 -13 L10 -15Z" fill="#cfd2d6" stroke="#6a6e76" stroke-width="1.4"/>
+    <circle cx="-1" cy="0" r="7" fill="#b9bdc3" stroke="#6a6e76" stroke-width="1"/><circle cx="-1" cy="0" r="2.5" fill="#7a7e86"/>
+    <path d="M-12 -12 L-6 -6 M-14 8 L-7 4 M4 -14 L2 -7 M-18 0 L-9 0" stroke="#8a8e96" stroke-width="1"/>
+    <rect x="-10" y="-14" width="7" height="4" fill="#b8573a" opacity=".8"/><rect x="2" y="8" width="5" height="3" fill="#b8573a" opacity=".8"/>
+    <path d="M4 14 L14 22 L20 20 L12 12Z" fill="#cfd2d6" stroke="#6a6e76" stroke-width="1.2"/><circle cx="17" cy="21" r="3.2" fill="#2a2e36" stroke="#6a6e76" stroke-width="1"/>
+    <circle cx="-7" cy="-9" r="3" fill="#a9adb3" stroke="#6a6e76" stroke-width="1"/></g></g>`;
+}
+function drawMap(){
+  const svg=$('mapsvg'); const n=S.conquered;
+  let h=`<defs><radialGradient id="neb1"><stop offset="0" stop-color="#5a2a8a" stop-opacity=".45"/><stop offset="1" stop-color="#5a2a8a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="neb2"><stop offset="0" stop-color="#1a5a8a" stop-opacity=".45"/><stop offset="1" stop-color="#1a5a8a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="neb3"><stop offset="0" stop-color="#8a2a3a" stop-opacity=".35"/><stop offset="1" stop-color="#8a2a3a" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="300" cy="300" rx="380" ry="240" fill="url(#neb2)"/><ellipse cx="700" cy="380" rx="360" ry="220" fill="url(#neb1)"/><ellipse cx="880" cy="140" rx="200" ry="160" fill="url(#neb3)"/>`;
+  // route
+  const pts=[START,...PLANETS];
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1], done=i<n;
+    h+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${done?'#ffd84a':'#8fa4ff'}" stroke-width="${done?4:2.5}" stroke-dasharray="${done?'0':'8 10'}" opacity="${done?.85:.4}"/>`;
+  }
+  // start base
+  h+=`<g class="planet"><circle cx="${START.x}" cy="${START.y}" r="20" fill="#3a6a3a" stroke="#7ac07a" stroke-width="2"/><circle cx="${START.x-6}" cy="${START.y-5}" r="5" fill="#5a9a5a"/>
+     <text x="${START.x}" y="${START.y+42}">${START.name}</text><text class="foe" x="${START.x}" y="${START.y+58}" style="fill:#9fe09f">${START.sub}</text></g>`;
+  PLANETS.forEach((p,i)=>{
+    const st = i<n?'done':(i===n?'next':'locked');
+    h+=`<g class="planet ${st}" data-i="${i}">${planetArt(p,i)}<circle class="ring" cx="${p.x}" cy="${p.y}" r="${p.r+9}"/>
+      <circle cx="${p.x}" cy="${p.y}" r="${p.r+16}" fill="transparent"/>
+      <text x="${p.x}" y="${p.y+p.r+24}">${p.name}</text>
+      <text class="foe ${st==='done'?'done':''}" x="${p.x}" y="${p.y+p.r+41}">${st==='done'?t('map.freed'):(st==='next'?'⚔ '+p.foe.name:'?')}</text></g>`;
+  });
+  h+=shipSVG();
+  svg.innerHTML=h;
+  placeShip();
+  svg.querySelectorAll('.planet[data-i]').forEach(el=>el.onclick=()=>clickPlanet(+el.dataset.i));
+  const hr=hero();
+  $('who').innerHTML=figureSVG(hr.look)+`<div>${hr.name}<div class="stat">${DIFFS[S.diff].name}</div></div>`;
+  const st=S.stats, pct=st.total?Math.round(100*st.right/st.total):0;
+  $('mapStats').innerHTML=t('map.stats',n,PLANETS.length,st.right,st.total,pct,st.best);
+  $('mapHint').innerHTML = n>=PLANETS.length ? t('map.allFree') : t('map.next',PLANETS[n].name,PLANETS[n].foe.name);
+}
+function placeShip(){
+  const s=document.getElementById('ship'); if(!s) return;
+  s.setAttribute('transform',`translate(${shipPos.x},${shipPos.y-34}) rotate(${shipAng})`);
+}
+function openMap(){
+  closeModal(); show('map');
+  if(!flying){ const p=nodePos(S.conquered-1); shipPos={x:p.x,y:p.y}; }
+  drawMap();
+}
+function clickPlanet(i){
+  if (flying) return;
+  if (i>S.conquered){ const h=$('mapHint'); h.innerHTML=t('map.locked',PLANETS[i].name,PLANETS[S.conquered].name); return; }
+  const to=PLANETS[i], from={...shipPos};
+  const dist=Math.hypot(to.x-from.x,to.y-from.y);
+  if (dist<1){ intro(i); return; }
+  flying=true; SFX.fly();
+  shipAng=Math.atan2(to.y-from.y,to.x-from.x)*180/Math.PI;
+  const dur=Math.min(1600,500+dist*2.2), t0=performance.now();
+  (function step(now){
+    const k=Math.min(1,(now-t0)/dur), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    shipPos={x:from.x+(to.x-from.x)*e, y:from.y+(to.y-from.y)*e}; placeShip();
+    if(k<1) requestAnimationFrame(step); else { flying=false; shipAng=0; placeShip(); intro(i); }
+  })(t0);
+}
+function intro(i){
+  const p=PLANETS[i], hr=hero(), boss=p.deathstar;
+  modal(`<h2>${boss?t('intro.final'):p.name.toUpperCase()}</h2>
+    <p>${boss?t('intro.ds'):t('intro.rules',p.foe.name,p.name)}</p>
+    <div class="vs">${figureSVG(hr.look)}<div class="x">VS</div>${figureSVG(p.foe.look,true)}</div>
+    <p class="taunt">${p.foe.name}: ${p.foe.taunt}</p>
+    <p style="color:var(--dim);font-size:14px">${t('intro.how',p.foe.name)}${p.foe.hp?`<br><b style="color:var(--bad)">${t('intro.strong',p.foe.name,p.foe.hp,MAXHP)}</b>`:''}</p>
+    <div class="row"><button class="btn ghost" onclick="closeModal()">${t('intro.notYet')}</button><button class="btn" id="fightBtn">${t('intro.fight')}</button></div>`);
+  $('fightBtn').onclick=()=>startBattle(i);
+}
+$('changeBtn').onclick=openSelect;
+
+/* ---- battle ---- */
+let B=null;
+const MAXHP=5;
+function pips(n,max){ let h=''; for(let i=0;i<max;i++) h+=`<div class="pip${i>=n?' lost':''}"></div>`; return h; }
+function startBattle(i){
+  closeModal();
+  const p=PLANETS[i], hr=hero();
+  B={pi:i, heroHP:MAXHP, foeHP:p.foe.hp||MAXHP, foeMax:p.foe.hp||MAXHP, q:null, input:'', busy:false, streak:0};
+  $('bPlanet').textContent=p.name;
+  $('scene').innerHTML=sceneSVG(p.id);
+  $('figHero').innerHTML=figureSVG(hr.look); $('figFoe').innerHTML=figureSVG(p.foe.look,true);
+  $('tagHero').textContent=hr.name; $('tagFoe').textContent=p.foe.name;
+  renderHP(); show('battle'); nextQuestion();
+}
+function renderHP(){ $('hpHero').innerHTML=pips(B.heroHP,MAXHP); $('hpFoe').innerHTML=pips(B.foeHP,B.foeMax); }
+function nextQuestion(){
+  B.q=makeQuestion(S.diff,B.pi); B.choices=makeChoices(B.q); B.input=''; B.busy=false;
+  $('qtext').textContent=B.q.text+(B.q.text.includes('?')?'':' = ?');
+  $('qlabel').textContent=t('lbl.'+(B.q.label||'pick'));
+  $('qvis').innerHTML=B.q.vis?visHTML(...B.q.vis):'';
+  $('choices').style.gridTemplateColumns=`repeat(${B.choices.length},minmax(0,1fr))`; $('choices').style.maxWidth=B.choices.length<5?'520px':'';
+  $('fb').innerHTML=B.streak>=3?`<span class="right">${t('bat.streak',B.streak)}</span>`:'';
+  $('panel').classList.remove('waiting');
+  $('choices').innerHTML=B.choices.map((v,i)=>`<button class="choice" data-i="${i}"><small>${i+1}</small>${v}</button>`).join('');
+  $('choices').querySelectorAll('.choice').forEach(b=>b.addEventListener('pointerdown',e=>{ e.preventDefault(); choose(+b.dataset.i); }));
+}
+function visHTML(a,op,b){
+  const star=cls=>`<span class="st${cls}">⭐</span>`;
+  if(op==='+') return star('').repeat(a)+(a?`<span class="op">+</span>`:'')+star('').repeat(b);
+  return star('').repeat(a-b)+star(' gone').repeat(b);
+}
+function choose(i){
+  if(!B||B.busy||!$('battle').classList.contains('on')||$('panel').classList.contains('waiting')) return;
+  if(i<0||i>=B.choices.length) return;
+  B.input=String(B.choices[i]); B.picked=i; answer();
+}
+function markChoices(){
+  $('choices').querySelectorAll('.choice').forEach((b,i)=>{
+    const v=B.choices[i];
+    b.classList.add(v===B.q.ans?'good':(i===B.picked?'bad':'dim'));
+  });
+}
+addEventListener('keydown',e=>{
+  if($('modal').classList.contains('on')){ if(e.key==='Enter'){ const b=$('modalBox').querySelector('.btn:last-of-type'); if(b) b.click(); } return; }
+  if(!$('battle').classList.contains('on')) return;
+  if($('panel').classList.contains('waiting')){ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); $('contBtn').click(); } return; }
+  if(/^[1-5]$/.test(e.key)) choose(+e.key-1);
+});
+$('contBtn').onclick=()=>{ if(B) afterHit(); };
+
+function attackFx(fromHero, look){
+  const fx=$('fx'), atk=fromHero?$('fHero'):$('fFoe'), def=fromHero?$('fFoe'):$('fHero');
+  const ranged = look.weapon==='blaster', zap = look.weapon==='lightning';
+  if(!ranged && !zap){ atk.classList.remove('lunge'); void atk.offsetWidth; atk.classList.add('lunge'); SFX.saber(); SFX.clash(); }
+  if(ranged){ SFX.blaster(); const b=document.createElement('div'); b.className='bolt '+(fromHero?'r':'l'); b.style.background=look.color; b.style.boxShadow=`0 0 12px ${look.color},0 0 24px ${look.color}`; fx.appendChild(b); setTimeout(()=>b.remove(),400); }
+  if(zap){ SFX.zap(); const s=document.createElementNS('http://www.w3.org/2000/svg','svg'); s.setAttribute('class','zap'); s.setAttribute('viewBox','0 0 100 100'); s.setAttribute('preserveAspectRatio','none');
+    let paths=''; for(let j=0;j<3;j++){ let d=`M${fromHero?30:70} ${45+j*3}`; for(let x=1;x<=8;x++){ const xx=fromHero?30+x*5:70-x*5; d+=` L${xx} ${40+Math.random()*16}`; } paths+=`<path d="${d}" stroke="${look.color}" stroke-width=".8" fill="none" style="filter:drop-shadow(0 0 2px ${look.color})"/>`; }
+    s.innerHTML=paths; fx.appendChild(s); setTimeout(()=>s.remove(),550); }
+  setTimeout(()=>{
+    def.classList.remove('hit'); void def.offsetWidth; def.classList.add('hit');
+    const sp=document.createElement('div'); sp.className='spark'; sp.style.left=fromHero?'74%':'26%'; fx.appendChild(sp); setTimeout(()=>sp.remove(),500);
+    const fl=document.createElement('div'); fl.className='float'; fl.textContent='−1'; fl.style.left=fromHero?'72%':'22%'; fl.style.color=fromHero?'#ff5266':'#5cc8ff'; fx.appendChild(fl); setTimeout(()=>fl.remove(),1000);
+  }, ranged?260:(zap?200:220));
+}
+function answer(){
+  B.busy=true;
+  const val=parseInt(B.input,10), ok=val===B.q.ans, p=PLANETS[B.pi];
+  S.stats.total++;
+  if(ok){
+    S.stats.right++; B.streak++; S.stats.best=Math.max(S.stats.best,B.streak);
+    markChoices();
+    $('fb').innerHTML=`<span class="right">${pick(t('bat.praise'))}</span>`;
+    attackFx(true, hero().look);
+    setTimeout(()=>{ B.foeHP--; renderHP(); const pp=$('hpFoe').children[B.foeHP]; if(pp) pp.classList.add('pop'); }, 450);
+    setTimeout(()=>afterHit(), 1150);
+  } else {
+    B.streak=0;
+    markChoices();
+    $('fb').innerHTML=`<span class="wrong">${t('bat.oops',B.q.text,B.q.text.includes('?'),B.q.ans)}</span><span class="tip">💡 ${B.q.hint}</span>`;
+    attackFx(false, p.foe.look);
+    setTimeout(()=>{ B.heroHP--; renderHP(); const pp=$('hpHero').children[B.heroHP]; if(pp) pp.classList.add('pop'); SFX.wrong(); }, 450);
+    setTimeout(()=>{ $('panel').classList.add('waiting'); }, 700);
+  }
+  save();
+}
+function afterHit(){
+  $('panel').classList.remove('waiting');
+  if(B.foeHP<=0) return winBattle();
+  if(B.heroHP<=0) return loseBattle();
+  nextQuestion();
+}
+function winBattle(){
+  const p=PLANETS[B.pi], first=B.pi===S.conquered;
+  if(first) S.conquered++;
+  save(); SFX.win(); B.busy=true;
+  if(p.deathstar && first){ return finale(); }
+  const nxt=PLANETS[S.conquered];
+  modal(`<h2>${t('win.title')}</h2><div class="vs">${figureSVG(hero().look)}</div>
+    <p>${t('win.text',p.foe.name,p.name)}</p>
+    ${nxt&&first?`<p style="color:var(--gold)">${t('win.next',nxt.name,nxt.foe.name)}</p>`:''}
+    <div class="row"><button class="btn" id="toMap">${t('win.toMap')}</button></div>`);
+  confetti(1800);
+  $('toMap').onclick=openMap;
+}
+function loseBattle(){
+  const p=PLANETS[B.pi]; SFX.lose(); B.busy=true;
+  modal(`<h2 style="color:var(--bad)">${t('lose.title')}</h2><div class="vs">${figureSVG(p.foe.look,true)}</div>
+    <p>${t('lose.text',p.foe.name)}</p><p style="color:var(--gold)">${t('lose.tip')}</p>
+    <div class="row"><button class="btn ghost" id="toMap">${t('lose.map')}</button><button class="btn" id="retry">${t('lose.retry')}</button></div>`);
+  $('toMap').onclick=openMap; $('retry').onclick=()=>startBattle(B.pi);
+}
+function finale(){
+  const st=S.stats, pct=st.total?Math.round(100*st.right/st.total):0, hr=hero();
+  const di=DIFF_ORDER.indexOf(S.diff), harder=DIFF_ORDER[di+1];
+  modal(`<h2>${t('fin.title')}</h2>
+    <div class="vs">${figureSVG(hr.look)}</div>
+    <p>${t('fin.text',hr.name)}</p>
+    <p>${t('fin.stats',st.right,st.total,pct,st.best)}</p>
+    <div class="row"><button class="btn ghost" id="toMap">${t('lose.map')}</button>${harder?`<button class="btn" id="harder">${t('fin.harder',DIFFS[harder].name.toUpperCase())}</button>`:`<button class="btn" id="again">${t('fin.again')}</button>`}</div>`);
+  confetti(6000);
+  $('toMap').onclick=openMap;
+  const again=()=>{ const keep={hero:S.hero,sound:S.sound,lang:S.lang,diff:harder||S.diff,seenCrawl:true}; S=Object.assign(freshSave(),keep); save(); openMap(); };
+  if($('harder')) $('harder').onclick=again; if($('again')) $('again').onclick=again;
+}
+$('fleeBtn').onclick=()=>{ if(confirm(t('bat.flee'))) openMap(); };
+$('modal').addEventListener('click',e=>{ if(e.target.id==='modal' && $('map').classList.contains('on')) closeModal(); });
+
+/* ---- confetti / stars ---- */
+function confetti(ms){
+  const cv=$('confetti'), cx=cv.getContext('2d'); cv.width=innerWidth; cv.height=innerHeight;
+  const cols=['#ffd84a','#5cc8ff','#4ade80','#ff5266','#b55cff','#fff'];
+  const P=Array.from({length:160},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:3+Math.random()*4,c:pick(cols),a:Math.random()*6}));
+  const t0=performance.now();
+  (function f(now){ cx.clearRect(0,0,cv.width,cv.height);
+    for(const p of P){ p.x+=p.vx; p.y+=p.vy; p.a+=.1; if(p.y>cv.height+10 && now-t0<ms){ p.y=-10; p.x=Math.random()*cv.width; }
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle=p.c; cx.fillRect(-p.r,-p.r/2,p.r*2,p.r); cx.restore(); }
+    if(now-t0<ms+2500) requestAnimationFrame(f); else cx.clearRect(0,0,cv.width,cv.height); })(t0);
+}
+
+applyLang(); show('title');
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
